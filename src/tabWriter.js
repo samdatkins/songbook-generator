@@ -1,9 +1,6 @@
 import { Document, Packer, Paragraph } from "docx";
 import * as fs from "fs";
 
-// todo: don't break page between chords/lyrics
-// todo: allow override of tab choice via URL
-
 const maxLinesPerSong = 116;
 const linesInSinglePage = 63;
 const maxColumns = 90;

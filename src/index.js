@@ -1,16 +1,18 @@
 import "@babel/polyfill";
 import * as fs from "fs";
 import { TabWriter } from "./tabWriter";
-import { getBestMatch, getTab } from "./ultimateGuitarSearcher";
+import { getBestMatch, getTabForUrl } from "./ultimateGuitarSearcher";
 
 // Have to use a wrapper function because babel won't recognize async at top level
 main();
 
 async function main() {
-  var songArray = await fs
+  const songArray = await fs
     .readFileSync("in.txt")
     .toString()
     .split("\r\n");
+
+  const { songOverrides } = JSON.parse(fs.readFileSync("songOverrides.json"));
 
   const tabWriter = new TabWriter();
 
@@ -19,11 +21,24 @@ async function main() {
   console.log(songArray);
 
   for (const song of songArray) {
-    const tab = await getTabForSong(song, tabWriter);
+    const override = getSongOverrideIfAny(song, songOverrides);
+    var tab;
+    override
+      ? (tab = await getTabForUrl(override.urlOverride))
+      : (tab = await getTabForSong(song, tabWriter));
+      
     tab && tabWriter.writeTabToDoc(tab);
   }
 
   tabWriter.save("My Document.docx");
+}
+
+function getSongOverrideIfAny(song, songOverrides) {
+  const override = songOverrides.find(songOverride =>
+    trimAndCompareStringsInsensitive(songOverride.song, song),
+  );
+
+  return override;
 }
 
 async function getTabForSong(song) {
@@ -37,5 +52,9 @@ async function getTabForSong(song) {
     return;
   }
 
-  return await getTab(match.url);
+  return await getTabForUrl(match.url);
+}
+
+function trimAndCompareStringsInsensitive(s1, s2) {
+  return s1.trim().toUpperCase() === s2.trim().toUpperCase();
 }

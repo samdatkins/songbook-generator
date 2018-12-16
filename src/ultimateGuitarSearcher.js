@@ -2,14 +2,13 @@ import * as ugs from "ultimate-guitar-scraper";
 
 export async function getBestMatch(artist, title) {
   var matches;
-  try{
+  try {
     matches = await fetchMatches(artist, title);
   } catch {
     return null;
   }
 
-  if (matches.length == 0)
-    return null;
+  if (matches.length == 0) return null;
 
   const maxNumberOfRatings = matches.reduce((prev, cur) =>
     prev.numberRates > cur.numberRates ? prev : cur,
@@ -42,17 +41,15 @@ async function fetchMatches(artist, title) {
   });
 }
 
-export async function getTab(url) {
+export async function getTabForUrl(url) {
   return new Promise((resolve, reject) => {
-    ugs.get(
-      url,
-      (error, tab) => {
-        if (error) {
-          reject();
-        } else {
-          resolve(tab);
-        }
-      },
-    );
+    ugs.get(url, (error, tab) => {
+      if (error) {
+        console.error(`Failed to find tab at URL: ${url}`);
+        reject();
+      } else {
+        resolve(tab);
+      }
+    });
   });
 }
