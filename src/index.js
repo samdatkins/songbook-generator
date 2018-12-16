@@ -7,8 +7,7 @@ const maxLinesPerSong = 116;
 const linesInSinglePage = 67;
 const maxColumns = 90;
 
-// Todo: add capo info
-
+// Have to use main because babel async won't work at top level
 main();
 
 async function main() {
@@ -82,9 +81,38 @@ function writeTabToDoc(tab, doc) {
     ? [tabLines.find(line => line.includes("capo"))]
     : [];
 
-  debugger;
+  if (hasAnyOverflowingLines(tab.content.text, capoLine, firstLineOfChords))
+    console.error(`${tab.name} contains lines that are too long\n`);
+
   const textLines = capoLine.concat(
-    tab.content.text
+    tab.content.text.split("\n").slice(firstLineOfChords, maxLinesPerSong),
+  );
+
+  textLines.map(line => writeLineToDoc(line, doc));
+
+  if (textLines.length < linesInSinglePage)
+    doc.addParagraph(new Paragraph().pageBreakBefore());
+}
+
+function writeLineToDoc(line, doc) {
+  const para = doc.createParagraph().style("monospaced");
+
+  const lineSplitByFormatting = line.split(/\[\/?ch\]/g);
+  
+  lineSplitByFormatting.forEach((lineFragment, index) => {
+    if (lineFragment.length === 0)
+      return;
+
+    if (index % 2 === 0)
+      para.createTextRun(lineFragment);
+    else
+      para.createTextRun(lineFragment).color("blue");
+  });
+}
+
+function hasAnyOverflowingLines(tabContent, capoLine, firstLineOfChords) {
+  const textLines = capoLine.concat(
+    tabContent
       .replace(/\[ch\]/g, "")
       .replace(/\[\/ch\]/g, "")
       .split("\n")
@@ -92,12 +120,7 @@ function writeTabToDoc(tab, doc) {
   );
 
   if (textLines.filter(line => line.length > maxColumns).length > 0)
-    console.error(`${tab.name} contains lines that are too long\n`);
+    return true;
 
-  textLines.map(line =>
-    doc.addParagraph(new Paragraph(line).style("monospaced")),
-  );
-
-  if (textLines.length < linesInSinglePage)
-    doc.addParagraph(new Paragraph().pageBreakBefore());
+  return false;
 }
