@@ -22,3 +22,5 @@ yarn-error.log*
 .env
 *.png
 My Document.docx
+error.txt
+in.txt

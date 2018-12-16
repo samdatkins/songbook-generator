@@ -1,7 +1,12 @@
 import * as ugs from "ultimate-guitar-scraper";
 
 export async function getBestMatch(artist, title) {
-  const matches = await fetchMatches(artist, title);
+  var matches;
+  try{
+    matches = await fetchMatches(artist, title);
+  } catch {
+    return null;
+  }
 
   if (matches.length == 0)
     return null;

@@ -27,20 +27,29 @@ function _getBestMatch() {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            _context.next = 2;
+            _context.prev = 0;
+            _context.next = 3;
             return fetchMatches(artist, title);
 
-          case 2:
+          case 3:
             matches = _context.sent;
+            _context.next = 9;
+            break;
 
+          case 6:
+            _context.prev = 6;
+            _context.t0 = _context["catch"](0);
+            return _context.abrupt("return", null);
+
+          case 9:
             if (!(matches.length == 0)) {
-              _context.next = 5;
+              _context.next = 11;
               break;
             }
 
             return _context.abrupt("return", null);
 
-          case 5:
+          case 11:
             maxNumberOfRatings = matches.reduce(function (prev, cur) {
               return prev.numberRates > cur.numberRates ? prev : cur;
             }).numberRates;
@@ -48,12 +57,12 @@ function _getBestMatch() {
               return prev.numberRates / maxNumberOfRatings * prev.rating > cur.numberRates / maxNumberOfRatings * cur.rating ? prev : cur;
             }));
 
-          case 7:
+          case 13:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, this);
+    }, _callee, this, [[0, 6]]);
   }));
   return _getBestMatch.apply(this, arguments);
 }

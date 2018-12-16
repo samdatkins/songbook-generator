@@ -9,7 +9,7 @@
     "ultimate-guitar-scraper": "^1.1.0"
   },
   "scripts": {
-    "start": "yarn run build && node dist/index.js",
+    "start": "yarn run build && node dist/index.js 2> error.txt",
     "build": "babel src/ -d dist"
   },
   "devDependencies": {
