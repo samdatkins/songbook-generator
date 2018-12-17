@@ -41,7 +41,8 @@ export class TabWriter {
     songArray.map(song =>
       doc.addParagraph(new Paragraph(song).style("monospaced")),
     );
-    doc.addParagraph(new Paragraph().pageBreakBefore());
+    if (songArray.length <= 63)
+      doc.addParagraph(new Paragraph().pageBreakBefore());
   }
 
   writeTabToDoc(tab) {
@@ -56,10 +57,11 @@ export class TabWriter {
 
     const tabLines = tab.content.text.split("\n");
     const firstLineOfChords = tabLines.findIndex(line => line.includes("[ch]"));
-    const capoLine = tabLines.find(line => line.includes("capo"))
-      ? [tabLines.find(line => line.includes("capo"))]
-      : [];
-
+    const capoString = tabLines.find(line =>
+      line.toUpperCase().includes("CAPO"),
+    );
+    const capoLine = capoString ? [capoString] : [];
+    debugger;
     if (
       this[_hasAnyOverflowingLines](
         tab.content.text,
@@ -81,11 +83,10 @@ export class TabWriter {
 
   // private method
   [_writeLineToDoc](line, lineIndex) {
-
     const lineSplitByFormatting = line.split(/\[\/?ch\]/g);
 
     // Don't split chord/lyric line pairs over a new page
-    if ((lineIndex + 1) == linesInSinglePage && lineSplitByFormatting.length > 1)
+    if (lineIndex + 1 == linesInSinglePage && lineSplitByFormatting.length > 1)
       doc.addParagraph(new Paragraph(" "));
 
     const para = doc.createParagraph().style("monospaced");

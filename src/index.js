@@ -26,7 +26,7 @@ async function main() {
     override
       ? (tab = await getTabForUrl(override.urlOverride))
       : (tab = await getTabForSong(song, tabWriter));
-      
+
     tab && tabWriter.writeTabToDoc(tab);
   }
 
