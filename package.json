@@ -5,12 +5,14 @@
   "license": "MIT",
   "dependencies": {
     "@babel/polyfill": "^7.0.0",
+    "@sendgrid/mail": "^6.3.1",
     "docx": "^4.4.1",
+    "dotenv": "^6.2.0",
     "ultimate-guitar-scraper": "^1.1.0"
   },
   "scripts": {
     "start": "yarn run build && node dist/index.js 2> error.txt",
-    "build": "babel src/ -d dist"
+    "build": "babel src/ -d dist --source-maps"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.0",

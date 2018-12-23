@@ -1,8 +1,11 @@
 import "@babel/polyfill";
+import * as dotenv from "dotenv";
 import * as fs from "fs";
+import { sendEmail } from "./emailClient";
 import { TabWriter } from "./tabWriter";
 import { getBestMatch, getTabForUrl } from "./ultimateGuitarSearcher";
 
+dotenv.config();
 // Have to use a wrapper function because babel won't recognize async at top level
 main();
 
@@ -30,7 +33,9 @@ async function main() {
     tab && tabWriter.writeTabToDoc(tab);
   }
 
-  tabWriter.save("My Document.docx");
+  const tabAttachment = await tabWriter.getDocAsBase64String();
+
+  const result = await sendEmail(tabAttachment);
 }
 
 function getSongOverrideIfAny(song, songOverrides) {

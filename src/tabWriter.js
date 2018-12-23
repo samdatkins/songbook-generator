@@ -36,6 +36,11 @@ export class TabWriter {
     });
   }
 
+  async getDocAsBase64String() {
+    const packer = new Packer();
+    return await packer.toBase64String(doc);
+  }
+
   addTableOfContents(songArray) {
     doc.addParagraph(new Paragraph("Table of Contents:").title());
     songArray.map(song =>
@@ -61,7 +66,6 @@ export class TabWriter {
       line.toUpperCase().includes("CAPO"),
     );
     const capoLine = capoString ? [capoString] : [];
-    debugger;
     if (
       this[_hasAnyOverflowingLines](
         tab.content.text,
