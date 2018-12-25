@@ -17,7 +17,9 @@ app.use(express.static("public"));
 app.post("/submit-tab", (req, res) => {
   console.log(req.body.playlist);
   processSongbook(req.body.playlist, req.body.email);
-  res.send("Songbook processing");
+  res.send(`Your sonbook is being processed, when it is finished it will be 
+  emailed to the email address you provided (generally takes less than one 
+  minute).`);
 });
 
 app.get("/", (req, res) => res.sendFile(path.join(__dirname + "/index.html")));
