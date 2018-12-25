@@ -1,19 +1,35 @@
 import "@babel/polyfill";
+import bodyParser from "body-parser";
 import * as dotenv from "dotenv";
+import express from "express";
 import * as fs from "fs";
+import path from "path";
 import { sendEmail } from "./emailClient";
 import { TabWriter } from "./tabWriter";
 import { getBestMatch, getTabForUrl } from "./ultimateGuitarSearcher";
 
 dotenv.config();
-// Have to use a wrapper function because babel won't recognize async at top level
-main();
 
-async function main() {
-  const songArray = await fs
-    .readFileSync("in.txt")
-    .toString()
-    .split("\r\n");
+const app = express();
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.static("public"));
+const port = 3000;
+
+app.post("/submit-tab", (req, res) => {
+  console.log(req.body.playlist);
+  processSongbook(req.body.playlist, req.body.email);
+  res.send("Songbook processing");
+});
+
+app.get("/", (req, res) => res.sendFile(path.join(__dirname + "/index.html")));
+
+app.listen(port, () =>
+  console.log(`Tab writer app listening on port ${port}!`),
+);
+
+async function processSongbook(playlistFile, toEmailAddress) {
+  const songArray = playlistFile.split("\n");
+  console.log(songArray);
 
   const { songOverrides } = JSON.parse(fs.readFileSync("songOverrides.json"));
 
@@ -35,7 +51,7 @@ async function main() {
 
   const tabAttachment = await tabWriter.getDocAsBase64String();
 
-  const result = await sendEmail(tabAttachment);
+  const result = await sendEmail(toEmailAddress, tabAttachment);
 }
 
 function getSongOverrideIfAny(song, songOverrides) {

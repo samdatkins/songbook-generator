@@ -1,8 +1,8 @@
-export async function sendEmail(tabAttachment) {
+export async function sendEmail(toEmailAddress, tabAttachment) {
   const sgMail = require("@sendgrid/mail");
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
   const msg = {
-    to: "sambowatkins@gmail.com",
+    to: toEmailAddress,
     from: "sam.d.atkins@gmail.com",
     subject: "Songbook Generated",
     text: "Attached is your songbook",
