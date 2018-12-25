@@ -13,7 +13,6 @@ dotenv.config();
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static("public"));
-const port = 3000;
 
 app.post("/submit-tab", (req, res) => {
   console.log(req.body.playlist);
@@ -23,7 +22,7 @@ app.post("/submit-tab", (req, res) => {
 
 app.get("/", (req, res) => res.sendFile(path.join(__dirname + "/index.html")));
 
-app.listen(port, () =>
+app.listen(process.env.PORT || 3000, () =>
   console.log(`Tab writer app listening on port ${port}!`),
 );
 

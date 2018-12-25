@@ -4,23 +4,21 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@babel/cli": "^7.2.0",
+    "@babel/core": "^7.2.2",
+    "@babel/plugin-transform-async-to-generator": "^7.2.0",
     "@babel/polyfill": "^7.0.0",
+    "@babel/preset-env": "^7.2.0",
     "@sendgrid/mail": "^6.3.1",
     "body-parser": "^1.18.3",
     "docx": "^4.4.1",
     "dotenv": "^6.2.0",
     "express": "^4.16.4",
+    "nodemon": "^1.18.9",
     "ultimate-guitar-scraper": "^1.1.0"
   },
   "scripts": {
     "start": "yarn run build && nodemon dist/index.js",
     "build": "babel src/ -d dist --source-maps"
-  },
-  "devDependencies": {
-    "@babel/cli": "^7.2.0",
-    "@babel/core": "^7.2.2",
-    "@babel/plugin-transform-async-to-generator": "^7.2.0",
-    "@babel/preset-env": "^7.2.0",
-    "nodemon": "^1.18.9"
   }
 }
