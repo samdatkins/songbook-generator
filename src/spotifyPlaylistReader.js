@@ -17,11 +17,13 @@ export async function getSpotifyPlaylistTracks(playlistId) {
   spotifyApi.setAccessToken(authData.body["access_token"]);
 
   const playlistData = await spotifyApi.getPlaylistTracks(playlistId, {
-    fields: "items(track(name,artists(name)))",
+    fields: "items(track(name,release_date,album(release_date),artists(name)))",
   });
 
   return playlistData.body.items.map(
     trackContainer =>
-      `${trackContainer.track.name} - ${trackContainer.track.artists[0].name}`,
+      `${new Date(trackContainer.track.album.release_date).getFullYear()} - ${
+        trackContainer.track.name
+      } - ${trackContainer.track.artists[0].name}`,
   );
 }

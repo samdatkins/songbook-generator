@@ -2,12 +2,13 @@
   <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="playlistFetcher.js"></script>
+    <script src="playlistDateRangeCalculator.js"></script>
   </head>
   <body>
     <div>
       <label
         >Spotify Playlist <br />
-        <input type="text" name="playlistURI" />&nbsp;&nbsp;<input
+        <input type="text" name="playlistURL" />&nbsp;&nbsp;<input
           type="submit"
           value="Fetch Playlist From Spotify"
           id="fetchPlaylist"
@@ -30,9 +31,10 @@
             rows="12"
             cols="80"
             name="playlist"
-            placeholder="Artist - Song&#10 --OR-- &#10Song"
+            placeholder="Release Year - Artist - Song"
           ></textarea>
         </label>
+        <p>Playlist date range: <span id="playlistYearRange"></span></p>
       </div>
       <br />
       <input type="submit" value="Submit" />

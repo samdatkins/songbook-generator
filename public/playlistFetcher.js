@@ -1,16 +1,18 @@
 $(document).ready(function() {
   $("#fetchPlaylist").click(function() {
     const regex = RegExp(/playlist\/(.*)\?/);
-    const playlistURI = regex.exec($("[name=playlistURI]").val())[1];
+    const playlistURL = regex.exec($("[name=playlistURL]").val())[1];
     $.ajax({
-      url: `/spotifyPlaylist?playlist_id=${playlistURI}`,
+      url: `/spotifyPlaylist?playlist_id=${playlistURL}`,
       type: "GET",
       success: function(result) {
         $("[name=playlist]").val(result.join("\n"));
+        $("[name=playlist]").trigger("change");
       },
       error: function(result) {
         alert("Failed to fetch playlist");
       },
+      timeout: 5000,
     });
   });
 });

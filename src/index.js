@@ -68,8 +68,9 @@ function getSongOverrideIfAny(song, songOverrides) {
 
 async function getTabForSong(song) {
   console.log(`Read in: ${song}`);
-  const title = song.split(" - ")[0].replace(/\(.+\)/g, "");
-  const artist = song.split(" - ").slice(-1);
+  const splitSong = song.split(" - ");
+  const title = splitSong[1].replace(/\(.+\)/g, "");
+  const artist = splitSong.slice(-1);
   console.log(`Searching for: ${title} - ${artist}`);
   const match = await getBestMatch(artist, title);
   if (!match) {
