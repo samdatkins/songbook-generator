@@ -2,6 +2,7 @@ import "@babel/polyfill";
 import bodyParser from "body-parser";
 import * as dotenv from "dotenv";
 import express from "express";
+import enforce from "express-sslify";
 import * as fs from "fs";
 import path from "path";
 import { sendEmail } from "./emailClient";
@@ -14,6 +15,7 @@ dotenv.config();
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static("public"));
+app.use(enforce.HTTPS());
 
 app.post("/submit-tab", (req, res) => {
   console.log(req.body.playlist);
