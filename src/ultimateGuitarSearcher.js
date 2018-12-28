@@ -32,7 +32,7 @@ async function fetchMatches(artist, title) {
       },
       (error, tabs) => {
         if (error) {
-          reject();
+          reject(error);
         } else {
           resolve(tabs);
         }

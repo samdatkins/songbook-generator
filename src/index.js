@@ -5,6 +5,7 @@ import express from "express";
 import enforce from "express-sslify";
 import * as fs from "fs";
 import path from "path";
+import { getMostPopularSongsForTimePeriod } from "./billboardTopHundredAggregator";
 import { sendEmail } from "./emailClient";
 import { getSpotifyPlaylistTracks } from "./spotifyPlaylistReader";
 import { TabWriter } from "./tabWriter";
@@ -13,7 +14,9 @@ import { getBestMatch, getTabForUrl } from "./ultimateGuitarSearcher";
 dotenv.config();
 
 const app = express();
-app.use(enforce.HTTPS({ trustProtoHeader: true }));
+process.env["NODE_ENV"] !== "development" &&
+  app.use(enforce.HTTPS({ trustProtoHeader: true }));
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static("public"));
 
@@ -24,6 +27,19 @@ app.post("/submit-tab", (req, res) => {
 });
 
 app.get("/", (req, res) => res.sendFile(path.join(__dirname + "/index.html")));
+
+app.get("/billboardTopPlaylist", async (req, res) => {
+  const popularSongs = await getMostPopularSongsForTimePeriod(
+    req.query.startYear,
+    req.query.endYear,
+    req.query.count,
+  );
+  res.send(
+    "<ol>" +
+      popularSongs.reduce((total, cur) => total + `<li>${cur[0]}</li>`, "") +
+      "</ol>",
+  );
+});
 
 app.get("/spotifyPlaylist", async (req, res) =>
   res.send(await getSpotifyPlaylistTracks(req.query.playlist_id)),
