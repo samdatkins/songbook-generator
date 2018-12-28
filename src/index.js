@@ -13,9 +13,9 @@ import { getBestMatch, getTabForUrl } from "./ultimateGuitarSearcher";
 dotenv.config();
 
 const app = express();
+app.use(enforce.HTTPS({ trustProtoHeader: true }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static("public"));
-app.use(enforce.HTTPS({ trustProtoHeader: true }));
 
 app.post("/submit-tab", (req, res) => {
   console.log(req.body.playlist);
