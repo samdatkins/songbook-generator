@@ -5,6 +5,7 @@ import express from "express";
 import * as fs from "fs";
 import path from "path";
 import { sendEmail } from "./emailClient";
+import { getSpotifyPlaylistTracks } from "./spotifyPlaylistReader";
 import { TabWriter } from "./tabWriter";
 import { getBestMatch, getTabForUrl } from "./ultimateGuitarSearcher";
 
@@ -22,8 +23,12 @@ app.post("/submit-tab", (req, res) => {
 
 app.get("/", (req, res) => res.sendFile(path.join(__dirname + "/index.html")));
 
-app.listen(process.env.PORT || 3000, () =>
-  console.log(`Tab writer app listening on port ${process.env.PORT}!`),
+app.get("/spotifyPlaylist", async (req, res) =>
+  res.send(await getSpotifyPlaylistTracks(req.query.playlist_id)),
+);
+
+app.listen(process.env["PORT"] || 3000, () =>
+  console.log(`Tab writer app listening on port ${process.env["PORT"]}!`),
 );
 
 async function processSongbook(playlistFile, toEmailAddress) {
