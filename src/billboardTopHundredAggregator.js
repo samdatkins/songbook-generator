@@ -22,26 +22,29 @@ export async function getMostPopularSongsForTimePeriod(
 
   // Break requests up in to chunks of 52 so we don't make hundreds of requests
   // at the same time
-  await _.chunk(dates, 52).reduce(async (acc, dateChunk) => {
-    await acc;
-    const billboardPromises = dateChunk.map(async date => {
-      try {
-        const billboardResults = await getBillboardChart(
-          "hot-100",
-          date.format("YYYY-MM-DD"),
-        );
-        billboardResults.map(songEntry => {
-          const song = `${songEntry.artist} - ${songEntry.title}`;
-          dict[song] === undefined && (dict[song] = 0);
-          dict[song] += 101 - parseInt(songEntry.rank);
-        });
-      } catch (err) {
-        console.log(`Failed to get chart for ${date.format("YYYY-MM-DD")}`);
-      }
-    });
+  await _.chunk(dates, process.env["BILLBOARD_CHUNK_SIZE"]).reduce(
+    async (acc, dateChunk) => {
+      await acc;
+      const billboardPromises = dateChunk.map(async date => {
+        try {
+          const billboardResults = await getBillboardChart(
+            "hot-100",
+            date.format("YYYY-MM-DD"),
+          );
+          billboardResults.map(songEntry => {
+            const song = `${songEntry.artist} - ${songEntry.title}`;
+            dict[song] === undefined && (dict[song] = 0);
+            dict[song] += 101 - parseInt(songEntry.rank);
+          });
+        } catch (err) {
+          console.log(`Failed to get chart for ${date.format("YYYY-MM-DD")}`);
+        }
+      });
 
-    await Promise.all(billboardPromises);
-  }, Promise.resolve());
+      await Promise.all(billboardPromises);
+    },
+    Promise.resolve(),
+  );
 
   var unorderedSongs = Object.keys(dict).map(function(key) {
     return [key, dict[key]];
