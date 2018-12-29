@@ -29,16 +29,14 @@ app.post("/submit-tab", (req, res) => {
 app.get("/", (req, res) => res.sendFile(path.join(__dirname + "/index.html")));
 
 app.get("/billboardTopPlaylist", async (req, res) => {
-  const popularSongs = await getMostPopularSongsForTimePeriod(
+  getMostPopularSongsForTimePeriod(
     req.query.startYear,
     req.query.endYear,
     req.query.count,
+    req.query.email,
   );
-  res.send(
-    "<ol>" +
-      popularSongs.reduce((total, cur) => total + `<li>${cur[0]}</li>`, "") +
-      "</ol>",
-  );
+
+  res.send("Queued job");
 });
 
 app.get("/spotifyPlaylist", async (req, res) =>
@@ -73,7 +71,13 @@ async function processSongbook(playlistFile, toEmailAddress) {
 
   const tabAttachment = await tabWriter.getDocAsBase64String();
 
-  const result = await sendEmail(toEmailAddress, tabAttachment);
+  const result = await sendEmail(
+    toEmailAddress,
+    "Songbook Generated",
+    "Attached is your songbook",
+    null,
+    tabAttachment,
+  );
 }
 
 function getSongOverrideIfAny(song, songOverrides) {

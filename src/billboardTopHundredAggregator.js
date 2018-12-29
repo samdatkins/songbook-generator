@@ -2,6 +2,7 @@ import * as billboard from "billboard-top-100";
 import * as _ from "lodash";
 import Moment from "moment";
 import { extendMoment } from "moment-range";
+import { sendEmail } from "./emailClient";
 
 const moment = extendMoment(Moment);
 
@@ -9,6 +10,7 @@ export async function getMostPopularSongsForTimePeriod(
   startYear,
   endYear,
   count,
+  email,
 ) {
   var dict = new Object();
   const dates = Array.from(
@@ -54,7 +56,20 @@ export async function getMostPopularSongsForTimePeriod(
     (first, second) => second[1] - first[1],
   );
 
-  return orderedSongs.slice(0, parseInt(count));
+  const html =
+    "<ol>" +
+    orderedSongs
+      .slice(0, parseInt(count))
+      .reduce((total, cur) => total + `<li>${cur[0]}</li>`, "") +
+    "</ol>";
+
+  const result = await sendEmail(
+    email,
+    "Billboard Playlist Generated",
+    null,
+    html,
+    null,
+  );
 }
 
 async function getBillboardChart(chart, date) {
