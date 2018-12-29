@@ -1,7 +1,7 @@
 const sessionId = "placeholder";
 const songLength = 60;
-const waitLength = 10;
-const drinkLength = 5;
+const waitLength = 7;
+const drinkLength = 7;
 const totalTimer = songLength + waitLength + drinkLength;
 
 const playlistTimer = new Interval(tick, 0.1, totalTimer, formatTimer);
@@ -22,6 +22,11 @@ $(document).ready(function() {
       playlistTimer.togglePause();
       e.preventDefault();
     }
+    // else if (e.keyCode == 27) {
+    //   // escape
+    //   playlistTimer.stop();
+    //   playlistTimer = null;
+    // }
   });
 
   setInterval(updateTotalSongs, 200);
@@ -29,21 +34,41 @@ $(document).ready(function() {
 
 function tick() {
   const countdown = playlistTimer.getCountdownTime();
+  var mode;
+  var timeToDisplay;
+  if (countdown > songLength + drinkLength) {
+    mode = "wait";
+    timeToDisplay = countdown - (songLength + drinkLength);
+  } else if (countdown > drinkLength) {
+    mode = "song";
+    timeToDisplay = countdown - drinkLength;
+  } else {
+    mode = "drink";
+    timeToDisplay = countdown;
+  }
+  timeToDisplay = timeToDisplay.toString().padStart(2, "0");
 
-  const timeToDisplay =
-    countdown > songLength ? countdown - songLength : countdown;
-  $("#timerCountdown").html(timeToDisplay.toString().padStart(2, "0"));
-
-  if (timeToDisplay !== countdown) {
+  var displayString;
+  if (mode === "wait") {
     $("#timerCountdown")
       .css("position", "absolute")
       .css("left", "17%")
       .css("font-size", "50em");
-  } else {
+    displayString = timeToDisplay;
+  } else if (mode === "song") {
     $("#timerCountdown")
       .css("position", "static")
       .css("font-size", "3.5em");
+    displayString = timeToDisplay;
+  } else {
+    $("#timerCountdown")
+      .css("position", "absolute")
+      .css("left", "5%")
+      .css("font-size", "30em");
+    displayString = "DRINK";
   }
+
+  $("#timerCountdown").html(displayString);
 
   if (countdown <= 0) {
     getPlaylist("next", "POST");
