@@ -2,10 +2,10 @@ import * as ugs from "ultimate-guitar-scraper";
 
 const maxLinesPerSong = 116;
 
-export async function getBestMatch(artist, title) {
+export async function getBestMatch(term) {
   var matches;
   try {
-    matches = await fetchMatches(artist, title);
+    matches = await fetchMatches(term);
   } catch {
     return null;
   }
@@ -24,11 +24,11 @@ export async function getBestMatch(artist, title) {
   );
 }
 
-async function fetchMatches(artist, title) {
+async function fetchMatches(term) {
   return new Promise((resolve, reject) => {
     ugs.search(
       {
-        query: `${artist} ${title}`,
+        query: `${term}`,
         page: 1,
         type: ["Chords"],
       },

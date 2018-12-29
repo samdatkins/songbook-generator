@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Live Playlist</title>
+    <title>Add to Live Playlist</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css"
@@ -13,16 +13,22 @@
       src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"
     ></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="/scripts/livePlaylistNav.js"></script>
     <link rel="stylesheet" href="/style/livePlaylist.css" />
   </head>
   <body>
     <section class="section">
       <div class="container">
-        <div style="float:right;" id="timerCountdown"></div>
-        <h1 class="title" id="songTitle"></h1>
-        <p class="subtitle" id="songUrl"></p>
-        <pre id="songTab"></pre>
+        <p class="subtitle">Do you want to add <%= song %> to the playlist?</p>
+
+        <a class="button is-primary is-fullwidth" href="/live/session/modify"
+          >Yes</a
+        >
+        <br />
+        <a
+          class="button is-fullwidth"
+          href="/live/session/remove?url=<%= url %>"
+          >No</a
+        >
       </div>
     </section>
   </body>

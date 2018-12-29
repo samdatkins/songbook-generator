@@ -1,3 +1,16 @@
 .chord {
   color: blue;
 }
+
+#songTab {
+  font-size: 13px;
+  font-family: Roboto Mono, monospace;
+  column-count: 2;
+  column-gap: 10px;
+  column-rule: 1px solid black;
+}
+
+#timerCountdown {
+  font-size: 3.5em;
+  float: right;
+}

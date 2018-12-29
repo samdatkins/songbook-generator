@@ -50,7 +50,7 @@ async function getTabForSong(song) {
   const title = splitSong[1].replace(/\(.+\)/g, "");
   const artist = splitSong.slice(-1);
   console.log(`Searching for: ${title} - ${artist}`);
-  const match = await getBestMatch(artist, title);
+  const match = await getBestMatch(`${artist} ${title}`);
   if (!match) {
     console.error(`Couldn't locate song: ${song}`);
     return;

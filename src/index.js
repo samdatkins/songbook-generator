@@ -7,7 +7,7 @@ import path from "path";
 import { getMostPopularSongsForTimePeriod } from "./billboardTopHundredAggregator";
 import { processSongbook } from "./songbookCreator";
 import { getSpotifyPlaylistTracks } from "./spotifyPlaylistReader";
-import { getTabForUrl } from "./ultimateGuitarSearcher";
+import { getBestMatch, getTabForUrl } from "./ultimateGuitarSearcher";
 
 dotenv.config();
 
@@ -15,6 +15,8 @@ const app = express();
 process.env["REQUIRE_HTTPS"] !== "false" &&
   app.use(enforce.HTTPS({ trustProtoHeader: true }));
 
+app.set("views", path.join(__dirname, "../views")); // set express to look in this folder to render our view
+app.set("view engine", "ejs"); // configure template engine
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static("public"));
 
@@ -42,40 +44,79 @@ app.get("/spotifyPlaylist", async (req, res) =>
 );
 
 var curIndex = 0;
-const songEntries = [
-  {
-    song: "I Melt With You - Modern English",
-    url:
-      "https://tabs.ultimate-guitar.com/tab/modern_english/i_melt_with_you_chords_566021",
-  },
-  {
-    song: "The Boys Of Summer - Don Henley",
-    url:
-      "https://tabs.ultimate-guitar.com/tab/don_henley/the_boys_of_summer_chords_1158736",
-  },
-  {
-    song: "I Think Were Alone Now - Tiffany",
-    url:
-      "https://tabs.ultimate-guitar.com/tab/tiffany/i_think_were_alone_now_chords_87379",
-  },
-];
+var songEntries = [];
 
 app.get("/live/:sessionId/view", async (req, res) =>
   res.sendFile(path.join(__dirname, "../public", "/livePlaylist.html")),
 );
 
+app.get("/live/:sessionId/modify", async (req, res) =>
+  res.sendFile(path.join(__dirname, "../public", "/addToLivePlaylist.html")),
+);
+
 app.get("/live/:sessionId/current", async (req, res) =>
-  res.json(await getTabForUrl(songEntries[curIndex].url)),
+  res.json(await getLivePlaylistModel(curIndex)),
+);
+
+app.get("/live/:sessionId/count", async (req, res) =>
+  res.json({ count: songEntries.length }),
 );
 
 app.post("/live/:sessionId/next", async (req, res) =>
-  res.json(await getTabForUrl(songEntries[++curIndex].url)),
+  res.json(await getLivePlaylistModel(++curIndex)),
 );
 
 app.post("/live/:sessionId/prev", async (req, res) =>
-  res.json(await getTabForUrl(songEntries[--curIndex].url)),
+  res.json(await getLivePlaylistModel(--curIndex)),
 );
+
+app.post("/live/:sessionId/add", async (req, res) => {
+  const match = await getBestMatch(req.body.song);
+  if (!match) {
+    res.send(
+      `<p>No matches found :(</p><a href='/live/${
+        req.query.sessionID
+      }/modify><- Back</a>`,
+    );
+  }
+  const songName = `${match.artist} - ${match.name}`;
+  const newEntry = {
+    song: songName,
+    url: match.url,
+  };
+  songEntries.push(newEntry);
+  res.render("test.ejs", newEntry);
+});
+
+app.get("/live/:sessionId/remove", async (req, res) => {
+  songEntries = songEntries.filter(entry => entry.url !== req.query.url);
+  res.redirect(`/live/${req.query.sessionId}/modify`);
+});
+
+app.get("/live/:sessionId/dump", async (req, res) => {
+  res.json(songEntries);
+});
+
+app.post("/live/:sessionId/restore", async (req, res) => {
+  songEntries = JSON.parse(req.body.songs);
+  res.end();
+});
+
+app.get("/live/:sessionId/setCurrent", async (req, res) => {
+  curIndex = req.query.cur - 1;
+  res.json(curIndex);
+});
 
 app.listen(process.env["PORT"] || 3000, () =>
   console.log(`Tab writer app listening on port ${process.env["PORT"]}!`),
 );
+
+async function getLivePlaylistModel() {
+  if (curIndex + 1 > songEntries.length) {
+    curIndex = songEntries.length - 1;
+  } else if (curIndex < 0) {
+    curIndex = 0;
+  }
+  const tab = await getTabForUrl(songEntries[curIndex].url);
+  return { tab, current: curIndex + 1, total: songEntries.length };
+}
