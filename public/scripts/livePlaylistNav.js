@@ -1,7 +1,9 @@
 const sessionId = "placeholder";
 const songLength = 60;
 const waitLength = 10;
-const totalTimer = songLength + waitLength;
+const drinkLength = 5;
+const totalTimer = songLength + waitLength + drinkLength;
+
 const playlistTimer = new Interval(tick, 0.1, totalTimer, formatTimer);
 const maxSongPollingInterval = 2;
 var lastMaxSongUpdate = new Date();
@@ -56,6 +58,9 @@ function getPlaylist(action, verb) {
     success: function(result) {
       const title = result.tab.artist + " - " + result.tab.name;
       const tab = result.tab.content.text
+        .split("\n")
+        .slice(0, 90)
+        .join("\n")
         .replace(/\r\n/g, "<br />")
         .replace(/\n/g, "<br />")
         .replace(/\[ch\]/g, "<span class='chord'>")
