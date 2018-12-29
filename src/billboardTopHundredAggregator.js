@@ -15,10 +15,7 @@ export async function getMostPopularSongsForTimePeriod(
   var dict = new Object();
   const dates = Array.from(
     moment
-      .range(
-        `${parseInt(startYear) - 1}-12-01`,
-        `${parseInt(endYear) - 1}-11-30`,
-      )
+      .range(`${parseInt(startYear) - 1}-12-01`, `${parseInt(endYear)}-11-30`)
       .by("week"),
   );
 
@@ -63,9 +60,10 @@ export async function getMostPopularSongsForTimePeriod(
       .reduce((total, cur) => total + `<li>${cur[0]}</li>`, "") +
     "</ol>";
 
+  const era = startYear === endYear ? startYear : `${startYear} - ${endYear}`;
   const result = await sendEmail(
     email,
-    "Billboard Playlist Generated",
+    `Billboard Playlist Generated (${era})`,
     null,
     html,
     null,
