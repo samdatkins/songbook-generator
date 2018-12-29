@@ -15,7 +15,7 @@ export async function sendEmail(
 
   html && (msg.html = html);
   text && (msg.text = text);
-
+  console.log(msg);
   attachment &&
     (msg.attachments = [
       {
@@ -27,5 +27,9 @@ export async function sendEmail(
         contentId: "mytext",
       },
     ]);
-  await sgMail.send(msg);
+  try {
+    await sgMail.send(msg);
+  } catch (err) {
+    console.err(`failed to send email: ${err}`);
+  }
 }

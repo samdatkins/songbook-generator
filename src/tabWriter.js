@@ -1,7 +1,6 @@
 import { Document, Packer, Paragraph } from "docx";
 import * as fs from "fs";
 
-const maxLinesPerSong = 116;
 const linesInSinglePage = 63;
 const maxColumns = 90;
 
@@ -60,24 +59,10 @@ export class TabWriter {
     doc.addParagraph(new Paragraph(`${tab.url}`).style("tiny"));
     doc.addParagraph(new Paragraph("").style("monospaced"));
 
-    const tabLines = tab.content.text.split("\n");
-    const firstLineOfChords = tabLines.findIndex(line => line.includes("[ch]"));
-    const capoString = tabLines.find(line =>
-      line.toUpperCase().includes("CAPO"),
-    );
-    const capoLine = capoString ? [capoString] : [];
-    if (
-      this[_hasAnyOverflowingLines](
-        tab.content.text,
-        capoLine,
-        firstLineOfChords,
-      )
-    )
+    if (this[_hasAnyOverflowingLines](tab))
       console.error(`${tab.name} contains lines that are too long`);
 
-    const textLines = capoLine.concat(
-      tab.content.text.split("\n").slice(firstLineOfChords, maxLinesPerSong),
-    );
+    const textLines = tab.content.text.split("\n");
 
     textLines.map((line, lineIndex) => this[_writeLineToDoc](line, lineIndex));
 
@@ -104,14 +89,11 @@ export class TabWriter {
   }
 
   // private method
-  [_hasAnyOverflowingLines](tabContent, capoLine, firstLineOfChords) {
-    const textLines = capoLine.concat(
-      tabContent
-        .replace(/\[ch\]/g, "")
-        .replace(/\[\/ch\]/g, "")
-        .split("\n")
-        .slice(firstLineOfChords, maxLinesPerSong),
-    );
+  [_hasAnyOverflowingLines](tab) {
+    const textLines = tab.content.text
+      .replace(/\[ch\]/g, "")
+      .replace(/\[\/ch\]/g, "")
+      .split("n");
 
     if (textLines.filter(line => line.length > maxColumns).length > 0)
       return true;

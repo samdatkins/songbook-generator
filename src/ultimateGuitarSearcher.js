@@ -1,5 +1,7 @@
 import * as ugs from "ultimate-guitar-scraper";
 
+const maxLinesPerSong = 116;
+
 export async function getBestMatch(artist, title) {
   var matches;
   try {
@@ -48,8 +50,22 @@ export async function getTabForUrl(url) {
         console.error(`Failed to find tab at URL: ${url}`);
         reject();
       } else {
-        resolve(tab);
+        resolve(formatTab(tab));
       }
     });
   });
+}
+
+function formatTab(tab) {
+  const tabLines = tab.content.text.split("\n");
+  const firstLineOfChords = tabLines.findIndex(line => line.includes("[ch]"));
+  const capoString = tabLines.find(line => line.toUpperCase().includes("CAPO"));
+  const capoLine = capoString ? [capoString] : [];
+
+  const textLines = capoLine.concat(
+    tab.content.text.split("\n").slice(firstLineOfChords, maxLinesPerSong),
+  );
+
+  tab.content.text = textLines.join("\n");
+  return tab;
 }
