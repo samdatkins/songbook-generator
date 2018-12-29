@@ -84,7 +84,10 @@ app.post("/live/:sessionId/add", async (req, res) => {
     song: songName,
     url: match.url,
   };
-  songEntries.push(newEntry);
+
+  if (songEntries.filter(entry => entry.url === match.url).length === 0) {
+    songEntries.push(newEntry);
+  }
   res.render("test.ejs", newEntry);
 });
 
@@ -117,6 +120,9 @@ async function getLivePlaylistModel() {
   } else if (curIndex < 0) {
     curIndex = 0;
   }
+
+  if (songEntries.length === 0) return null;
+
   const tab = await getTabForUrl(songEntries[curIndex].url);
   return { tab, current: curIndex + 1, total: songEntries.length };
 }
