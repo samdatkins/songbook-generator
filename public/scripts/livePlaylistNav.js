@@ -1,4 +1,5 @@
-const sessionId = "placeholder";
+const sessionIdRegex = new RegExp("live/(.*)/view");
+const sessionId = sessionIdRegex.exec(window.location.href)[1];
 const songLength = 60;
 const waitLength = 7;
 const drinkLength = 7;
@@ -9,6 +10,12 @@ const maxSongPollingInterval = 2;
 var lastMaxSongUpdate = new Date();
 
 $(document).ready(function() {
+  $("#qrcode").qrcode({
+    width: 120,
+    height: 120,
+    text: window.location.href.replace("view", "add"),
+  });
+
   getPlaylist("current", "GET");
   $("body").keydown(function(e) {
     if (e.keyCode == 37) {
@@ -21,12 +28,11 @@ $(document).ready(function() {
       // space
       playlistTimer.togglePause();
       e.preventDefault();
+    } else if (e.keyCode == 27) {
+      // escape
+      playlistTimer.stop();
+      playlistTimer.toggleDisabled();
     }
-    // else if (e.keyCode == 27) {
-    //   // escape
-    //   playlistTimer.stop();
-    //   playlistTimer = null;
-    // }
   });
 
   setInterval(updateTotalSongs, 200);
@@ -143,9 +149,10 @@ function Interval(fn, time, totalTime, formatTimerCB) {
   var timer = false;
   var timerStart;
   var pauseOffsetMS;
+  var disabled = false;
 
   this.start = () => {
-    if (!this.isRunning()) {
+    if (!this.isRunning() && !disabled) {
       timer = setInterval(this.fn, this.time * 1000);
       timerStart = Date.now();
     }
@@ -180,5 +187,9 @@ function Interval(fn, time, totalTime, formatTimerCB) {
       timerStart -= pauseOffsetMS;
       pauseOffsetMS = 0;
     }
+  };
+
+  this.toggleDisabled = () => {
+    disabled = !disabled;
   };
 }

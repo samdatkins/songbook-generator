@@ -43,86 +43,113 @@ app.get("/spotifyPlaylist", async (req, res) =>
   res.send(await getSpotifyPlaylistTracks(req.query.playlist_id)),
 );
 
-var curIndex = 0;
+// Live playlist code below (break out in to own file later)
+
+var curIndex = {};
 var songEntries = [];
 
 app.get("/live/:sessionId/view", async (req, res) =>
   res.sendFile(path.join(__dirname, "../public", "/livePlaylist.html")),
 );
 
-app.get("/live/:sessionId/modify", async (req, res) =>
-  res.sendFile(path.join(__dirname, "../public", "/addToLivePlaylist.html")),
+app.get("/live/:sessionId/add", async (req, res) =>
+  res.render("addToLivePlaylist.ejs", { sessionId: req.params.sessionId }),
 );
 
 app.get("/live/:sessionId/current", async (req, res) =>
-  res.json(await getLivePlaylistModel(curIndex)),
+  res.json(await getCurrentPlaylistSong(req.params.sessionId)),
 );
 
 app.get("/live/:sessionId/count", async (req, res) =>
-  res.json({ count: songEntries.length }),
+  res.json({
+    count: getAllPlaylistSongsForSession(req.params.sessionId).length,
+  }),
 );
 
-app.post("/live/:sessionId/next", async (req, res) =>
-  res.json(await getLivePlaylistModel(++curIndex)),
-);
+app.post("/live/:sessionId/next", async (req, res) => {
+  setIndex(req.params.sessionId, getIndex(req.params.sessionId) + 1);
+  res.json(await getCurrentPlaylistSong(req.params.sessionId));
+});
 
-app.post("/live/:sessionId/prev", async (req, res) =>
-  res.json(await getLivePlaylistModel(--curIndex)),
-);
+app.post("/live/:sessionId/prev", async (req, res) => {
+  setIndex(req.params.sessionId, getIndex(req.params.sessionId) - 1);
+  res.json(await getCurrentPlaylistSong(req.params.sessionId));
+});
 
 app.post("/live/:sessionId/add", async (req, res) => {
   const match = await getBestMatch(req.body.song);
   if (!match) {
     res.send(
       `<p>No matches found :(</p><a href='/live/${
-        req.query.sessionID
-      }/modify><- Back</a>`,
+        req.params.sessionId
+      }/add><- Back</a>`,
     );
   }
   const songName = `${match.artist} - ${match.name}`;
   const newEntry = {
     song: songName,
     url: match.url,
+    sessionId: req.params.sessionId,
   };
 
   if (songEntries.filter(entry => entry.url === match.url).length === 0) {
     songEntries.push(newEntry);
   }
-  res.render("test.ejs", newEntry);
+  res.render("addToLivePlaylistConfirm.ejs", newEntry);
 });
 
 app.get("/live/:sessionId/remove", async (req, res) => {
-  songEntries = songEntries.filter(entry => entry.url !== req.query.url);
-  res.redirect(`/live/${req.query.sessionId}/modify`);
+  songEntries = songEntries.filter(
+    entry =>
+      !(
+        entry.url === req.query.url && entry.sessionId === req.params.sessionId
+      ),
+  );
+  res.redirect(`/live/${req.params.sessionId}/add`);
 });
 
-app.get("/live/:sessionId/dump", async (req, res) => {
+app.get("/live/dump", async (req, res) => {
   res.json(songEntries);
 });
 
-app.post("/live/:sessionId/restore", async (req, res) => {
+app.post("/live/restore", async (req, res) => {
   songEntries = JSON.parse(req.body.songs);
   res.end();
 });
 
 app.get("/live/:sessionId/setCurrent", async (req, res) => {
-  curIndex = req.query.cur - 1;
-  res.json(curIndex);
+  setIndex(req.params.sessionId, req.query.cur - 1);
+  res.json(getIndex(req.params.sessionId));
 });
 
 app.listen(process.env["PORT"] || 3000, () =>
   console.log(`Tab writer app listening on port ${process.env["PORT"]}!`),
 );
 
-async function getLivePlaylistModel() {
-  if (curIndex + 1 > songEntries.length) {
-    curIndex = songEntries.length - 1;
-  } else if (curIndex < 0) {
-    curIndex = 0;
+async function getCurrentPlaylistSong(sessionId) {
+  const songEntriesForSession = getAllPlaylistSongsForSession(sessionId);
+  console.log(songEntriesForSession);
+  if (songEntriesForSession.length === 0) return null;
+
+  if (getIndex(sessionId) + 1 > songEntriesForSession.length) {
+    setIndex(sessionId, songEntriesForSession.length - 1);
+  } else if (getIndex(sessionId) < 0) {
+    setIndex(sessionId, 0);
   }
 
-  if (songEntries.length === 0) return null;
+  const tab = await getTabForUrl(songEntriesForSession[getIndex(sessionId)].url);
+  return { tab, current: getIndex(sessionId) + 1, total: songEntriesForSession.length };
+}
 
-  const tab = await getTabForUrl(songEntries[curIndex].url);
-  return { tab, current: curIndex + 1, total: songEntries.length };
+function getAllPlaylistSongsForSession(sessionId) {
+  return songEntries.filter(entry => entry.sessionId === sessionId);
+}
+
+function getIndex(sessionId) {
+  !curIndex[sessionId] && setIndex(sessionId, 0);
+  return curIndex[sessionId]; 
+}
+
+function setIndex(sessionId, newVal) {
+  curIndex[sessionId] = newVal;
 }

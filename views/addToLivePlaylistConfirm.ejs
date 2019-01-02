@@ -20,13 +20,15 @@
       <div class="container">
         <p class="subtitle">Do you want to add <%= song %> to the playlist?</p>
 
-        <a class="button is-primary is-fullwidth" href="/live/session/modify"
+        <a
+          class="button is-primary is-fullwidth"
+          href="/live/<%= sessionId %>/add"
           >Yes</a
         >
         <br />
         <a
           class="button is-fullwidth"
-          href="/live/session/remove?url=<%= url %>"
+          href="/live/<%= sessionId %>/remove?url=<%= url %>"
           >No</a
         >
       </div>
