@@ -108,6 +108,15 @@ app.get("/live/:sessionId/remove", async (req, res) => {
   res.redirect(`/live/${req.params.sessionId}/add`);
 });
 
+app.get("/live/:sessionId/plainText", async (req, res) => {
+  res.send(
+    getAllPlaylistSongsForSession(req.params.sessionId).reduce(
+      (acc, cur) => acc + cur.song.toString() + "<br />",
+      "",
+    ),
+  );
+});
+
 app.get("/live/dump", async (req, res) => {
   res.json(songEntries);
 });
@@ -137,8 +146,14 @@ async function getCurrentPlaylistSong(sessionId) {
     setIndex(sessionId, 0);
   }
 
-  const tab = await getTabForUrl(songEntriesForSession[getIndex(sessionId)].url);
-  return { tab, current: getIndex(sessionId) + 1, total: songEntriesForSession.length };
+  const tab = await getTabForUrl(
+    songEntriesForSession[getIndex(sessionId)].url,
+  );
+  return {
+    tab,
+    current: getIndex(sessionId) + 1,
+    total: songEntriesForSession.length,
+  };
 }
 
 function getAllPlaylistSongsForSession(sessionId) {
@@ -147,7 +162,7 @@ function getAllPlaylistSongsForSession(sessionId) {
 
 function getIndex(sessionId) {
   !curIndex[sessionId] && setIndex(sessionId, 0);
-  return curIndex[sessionId]; 
+  return curIndex[sessionId];
 }
 
 function setIndex(sessionId, newVal) {
