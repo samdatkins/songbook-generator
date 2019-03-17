@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import { sendEmail } from "./emailClient";
 import { TabWriter } from "./tabWriter";
-import { getBestMatch, getTabForUrl } from "./ultimateGuitarSearcher";
+import { getBestMatch, getTabForUrl } from "./tabSearcher";
 
 export async function processSongbook(playlistFile, toEmailAddress) {
   const songArray = playlistFile.split("\n");

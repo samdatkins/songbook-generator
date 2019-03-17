@@ -12,6 +12,7 @@
     "@sendgrid/mail": "^6.3.1",
     "billboard-top-100": "^2.1.2",
     "body-parser": "^1.18.3",
+    "cheerio": "^1.0.0-rc.2",
     "docx": "^4.4.1",
     "dotenv": "^6.2.0",
     "ejs": "^2.6.1",
@@ -21,8 +22,7 @@
     "moment": "^2.23.0",
     "moment-range": "^4.0.1",
     "nodemon": "^1.18.9",
-    "spotify-web-api-node": "^4.0.0",
-    "ultimate-guitar-scraper": "^1.1.0"
+    "spotify-web-api-node": "^4.0.0"
   },
   "scripts": {
     "start": "yarn run build && node dist/index.js",

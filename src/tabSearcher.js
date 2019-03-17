@@ -1,4 +1,4 @@
-import * as ugs from "ultimate-guitar-scraper";
+import * as ugs from "./tab-scraper";
 
 const maxLinesPerSong = 116;
 
@@ -13,14 +13,14 @@ export async function getBestMatch(term) {
   if (matches.length == 0) return null;
 
   const maxNumberOfRatings = matches.reduce((prev, cur) =>
-    prev.numberRates > cur.numberRates ? prev : cur,
+    prev.numberRates > cur.numberRates ? prev : cur
   ).numberRates;
 
   return matches.reduce((prev, cur) =>
     (prev.numberRates / maxNumberOfRatings) * prev.rating >
     (cur.numberRates / maxNumberOfRatings) * cur.rating
       ? prev
-      : cur,
+      : cur
   );
 }
 
@@ -30,7 +30,7 @@ async function fetchMatches(term) {
       {
         query: `${term}`,
         page: 1,
-        type: ["Chords"],
+        type: ["Chords"]
       },
       (error, tabs) => {
         if (error) {
@@ -38,7 +38,7 @@ async function fetchMatches(term) {
         } else {
           resolve(tabs);
         }
-      },
+      }
     );
   });
 }
@@ -63,7 +63,7 @@ function formatTab(tab) {
   const capoLine = capoString ? [capoString] : [];
 
   const textLines = capoLine.concat(
-    tab.content.text.split("\n").slice(firstLineOfChords, maxLinesPerSong),
+    tab.content.text.split("\n").slice(firstLineOfChords, maxLinesPerSong)
   );
 
   tab.content.text = textLines.join("\n");

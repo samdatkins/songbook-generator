@@ -7,7 +7,8 @@ import path from "path";
 import { getMostPopularSongsForTimePeriod } from "./billboardTopHundredAggregator";
 import { processSongbook } from "./songbookCreator";
 import { getSpotifyPlaylistTracks } from "./spotifyPlaylistReader";
-import { getBestMatch, getTabForUrl } from "./ultimateGuitarSearcher";
+import { getBestMatch, getTabForUrl } from "./tabSearcher";
+import * as ugs from "./tab-scraper";
 
 dotenv.config();
 
@@ -33,14 +34,14 @@ app.get("/billboardTopPlaylist", async (req, res) => {
     req.query.startYear,
     req.query.endYear,
     req.query.count,
-    req.query.email,
+    req.query.email
   );
 
   res.send("Queued job");
 });
 
 app.get("/spotifyPlaylist", async (req, res) =>
-  res.send(await getSpotifyPlaylistTracks(req.query.playlist_id)),
+  res.send(await getSpotifyPlaylistTracks(req.query.playlist_id))
 );
 
 // Live playlist code below (break out in to own file later)
@@ -48,22 +49,35 @@ app.get("/spotifyPlaylist", async (req, res) =>
 var curIndex = {};
 var songEntries = [];
 
+app.get("/live/tab-autocomplete", async (req, res) => {
+  const results = await new Promise((resolve, reject) => {
+    ugs.autocomplete(req.query.term, (error, tabs) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(tabs);
+      }
+    });
+  });
+  res.json(results);
+});
+
 app.get("/live/:sessionId/view", async (req, res) =>
-  res.sendFile(path.join(__dirname, "../public", "/livePlaylist.html")),
+  res.sendFile(path.join(__dirname, "../public", "/livePlaylist.html"))
 );
 
 app.get("/live/:sessionId/add", async (req, res) =>
-  res.render("addToLivePlaylist.ejs", { sessionId: req.params.sessionId }),
+  res.render("addToLivePlaylist.ejs", { sessionId: req.params.sessionId })
 );
 
 app.get("/live/:sessionId/current", async (req, res) =>
-  res.json(await getCurrentPlaylistSong(req.params.sessionId)),
+  res.json(await getCurrentPlaylistSong(req.params.sessionId))
 );
 
 app.get("/live/:sessionId/count", async (req, res) =>
   res.json({
-    count: getAllPlaylistSongsForSession(req.params.sessionId).length,
-  }),
+    count: getAllPlaylistSongsForSession(req.params.sessionId).length
+  })
 );
 
 app.post("/live/:sessionId/next", async (req, res) => {
@@ -82,14 +96,14 @@ app.post("/live/:sessionId/add", async (req, res) => {
     res.send(
       `<p>No matches found :(</p><a href='/live/${
         req.params.sessionId
-      }/add><- Back</a>`,
+      }/add><- Back</a>`
     );
   }
   const songName = `${match.artist} - ${match.name}`;
   const newEntry = {
     song: songName,
     url: match.url,
-    sessionId: req.params.sessionId,
+    sessionId: req.params.sessionId
   };
 
   if (songEntries.filter(entry => entry.url === match.url).length === 0) {
@@ -101,9 +115,7 @@ app.post("/live/:sessionId/add", async (req, res) => {
 app.get("/live/:sessionId/remove", async (req, res) => {
   songEntries = songEntries.filter(
     entry =>
-      !(
-        entry.url === req.query.url && entry.sessionId === req.params.sessionId
-      ),
+      !(entry.url === req.query.url && entry.sessionId === req.params.sessionId)
   );
   res.redirect(`/live/${req.params.sessionId}/add`);
 });
@@ -112,8 +124,8 @@ app.get("/live/:sessionId/plainText", async (req, res) => {
   res.send(
     getAllPlaylistSongsForSession(req.params.sessionId).reduce(
       (acc, cur) => acc + cur.song.toString() + "<br />",
-      "",
-    ),
+      ""
+    )
   );
 });
 
@@ -132,7 +144,7 @@ app.get("/live/:sessionId/setCurrent", async (req, res) => {
 });
 
 app.listen(process.env["PORT"] || 3000, () =>
-  console.log(`Tab writer app listening on port ${process.env["PORT"]}!`),
+  console.log(`Tab writer app listening on port ${process.env["PORT"]}!`)
 );
 
 async function getCurrentPlaylistSong(sessionId) {
@@ -147,12 +159,12 @@ async function getCurrentPlaylistSong(sessionId) {
   }
 
   const tab = await getTabForUrl(
-    songEntriesForSession[getIndex(sessionId)].url,
+    songEntriesForSession[getIndex(sessionId)].url
   );
   return {
     tab,
     current: getIndex(sessionId) + 1,
-    total: songEntriesForSession.length,
+    total: songEntriesForSession.length
   };
 }
 
