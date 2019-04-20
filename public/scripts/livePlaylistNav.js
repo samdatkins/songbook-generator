@@ -15,6 +15,7 @@ $(document).ready(function() {
     height: 120,
     text: window.location.href.replace("view", "add"),
   });
+  $("#qrcodelink").attr("href", window.location.href.replace("view", "add"));
 
   getPlaylist("current", "GET");
   $("body").keydown(function(e) {
@@ -86,7 +87,14 @@ function getPlaylist(action, verb) {
   $.ajax({
     url: `/live/${sessionKey}/${action}`,
     type: verb,
-    success: function(result) {
+    success: function(result, textStatus, xhr) {
+      if (xhr.status === 204) {
+        $("#songTitle").html(`No songs! Add some by clicking the QR code ->`);
+        $("#songTab").hide();
+        return;
+      }
+      $("#songTab").show();
+
       const title = result.artist + " - " + result.title;
       const tab = result.tab
         .split("\n")

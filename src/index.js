@@ -85,9 +85,11 @@ app.get("/live/:sessionKey/add", async (req, res) =>
   res.render("addToLivePlaylist.ejs", { sessionKey: req.params.sessionKey }),
 );
 
-app.get("/live/:sessionKey/current", async (req, res) =>
-  res.json(await getCurrentPlaylistSong(req.params.sessionKey)),
-);
+app.get("/live/:sessionKey/current", async (req, res) => {
+  const curSong = await getCurrentPlaylistSong(req.params.sessionKey);
+  if (!curSong) res.status(204);
+  return res.json(curSong);
+});
 
 app.get("/live/:sessionKey/count", async (req, res) =>
   res.json({
