@@ -9,6 +9,7 @@
     "@babel/plugin-transform-async-to-generator": "^7.2.0",
     "@babel/polyfill": "^7.0.0",
     "@babel/preset-env": "^7.2.0",
+    "@babel/register": "^7.4.0",
     "@sendgrid/mail": "^6.3.1",
     "billboard-top-100": "^2.1.2",
     "body-parser": "^1.18.3",
@@ -17,12 +18,14 @@
     "ejs": "^2.6.1",
     "express": "^4.16.4",
     "express-sslify": "^1.2.0",
+    "knex": "^0.16.5",
     "lodash": "^4.17.11",
     "moment": "^2.23.0",
     "moment-range": "^4.0.1",
     "nodemon": "^1.18.9",
+    "pg": "^7.10.0",
     "spotify-web-api-node": "^4.0.0",
-    "ultimate-guitar-scraper": "^1.1.0"
+    "uuid": "^3.3.2"
   },
   "scripts": {
     "start": "yarn run build && node dist/index.js",

@@ -5,9 +5,25 @@ import express from "express";
 import enforce from "express-sslify";
 import path from "path";
 import { getMostPopularSongsForTimePeriod } from "./billboardTopHundredAggregator";
+import "./db/knexfile";
+import {
+  addSongToSession,
+  createNewSongbookSession,
+  getCurrentActiveSongForSession,
+  getIndexOfCurrentSong,
+  getTotalNumberOfActiveSongsForSession,
+  safeDeleteSongFromSession,
+  setSongToNextActiveSongForSession,
+  setSongToPrevActiveSongForSession,
+  setSongToSpecificIndexOfActiveSongsForSession,
+} from "./db/repositories/songbook";
 import { processSongbook } from "./songbookCreator";
 import { getSpotifyPlaylistTracks } from "./spotifyPlaylistReader";
-import { getBestMatch, getTabForUrl } from "./ultimateGuitarSearcher";
+import {
+  formatTab,
+  getBestMatch,
+  getTabForUrl,
+} from "./ultimateGuitarSearcher";
 
 dotenv.config();
 
@@ -26,7 +42,9 @@ app.post("/submit-tab", (req, res) => {
   res.sendFile(path.join(__dirname, "../public", "/songbookProcessing.html"));
 });
 
-app.get("/", (req, res) => res.sendFile(path.join(__dirname + "/index.html")));
+app.get("/playlistGenerator", (req, res) =>
+  res.sendFile(path.join(__dirname, "../public", "/playlistGenerator.html")),
+);
 
 app.get("/billboardTopPlaylist", async (req, res) => {
   getMostPopularSongsForTimePeriod(
@@ -44,127 +62,117 @@ app.get("/spotifyPlaylist", async (req, res) =>
 );
 
 // Live playlist code below (break out in to own file later)
+app.get("/", (req, res) => res.redirect(`/live`));
+app.get("/live", (req, res) =>
+  res.sendFile(path.join(__dirname, "../public", "/liveLanding.html")),
+);
 
-var curIndex = {};
-var songEntries = [];
-
-app.get("/live/:sessionId/view", async (req, res) =>
+app.get("/live/:sessionKey/view", async (req, res) =>
   res.sendFile(path.join(__dirname, "../public", "/livePlaylist.html")),
 );
 
-app.get("/live/:sessionId/add", async (req, res) =>
-  res.render("addToLivePlaylist.ejs", { sessionId: req.params.sessionId }),
+app.get("/live/:sessionKey/add", async (req, res) =>
+  res.render("addToLivePlaylist.ejs", { sessionKey: req.params.sessionKey }),
 );
 
-app.get("/live/:sessionId/current", async (req, res) =>
-  res.json(await getCurrentPlaylistSong(req.params.sessionId)),
+app.get("/live/:sessionKey/current", async (req, res) =>
+  res.json(await getCurrentPlaylistSong(req.params.sessionKey)),
 );
 
-app.get("/live/:sessionId/count", async (req, res) =>
+app.get("/live/:sessionKey/count", async (req, res) =>
   res.json({
-    count: getAllPlaylistSongsForSession(req.params.sessionId).length,
+    count: await getTotalNumberOfActiveSongsForSession(req.params.sessionKey),
   }),
 );
 
-app.post("/live/:sessionId/next", async (req, res) => {
-  setIndex(req.params.sessionId, getIndex(req.params.sessionId) + 1);
-  res.json(await getCurrentPlaylistSong(req.params.sessionId));
+app.get("/live/view", async (req, res) => {
+  res.redirect(`/live/${req.query.sessionKey}/view`);
 });
 
-app.post("/live/:sessionId/prev", async (req, res) => {
-  setIndex(req.params.sessionId, getIndex(req.params.sessionId) - 1);
-  res.json(await getCurrentPlaylistSong(req.params.sessionId));
+app.post("/live/create", async (req, res) => {
+  await createNewSongbookSession(req.body.sessionKey);
+  res.redirect(`/live/${req.body.sessionKey}/view`);
 });
 
-app.post("/live/:sessionId/add", async (req, res) => {
+app.post("/live/:sessionKey/next", async (req, res) => {
+  await setSongToNextActiveSongForSession(req.params.sessionKey);
+  res.json(await getCurrentPlaylistSong(req.params.sessionKey));
+});
+
+app.post("/live/:sessionKey/prev", async (req, res) => {
+  await setSongToPrevActiveSongForSession(req.params.sessionKey);
+  res.json(await getCurrentPlaylistSong(req.params.sessionKey));
+});
+
+app.post("/live/:sessionKey/add", async (req, res) => {
   const match = await getBestMatch(req.body.song);
   if (!match) {
     res.send(
       `<p>No matches found :(</p><a href='/live/${
-        req.params.sessionId
+        req.params.sessionKey
       }/add><- Back</a>`,
     );
   }
-  const songName = `${match.artist} - ${match.name}`;
-  const newEntry = {
-    song: songName,
-    url: match.url,
-    sessionId: req.params.sessionId,
+  const tab = await getTabForUrl(match.url);
+  const newSong = {
+    artist: tab.artist,
+    title: tab.name,
+    url: tab.url,
+    content: tab.content.text,
   };
 
-  if (songEntries.filter(entry => entry.url === match.url).length === 0) {
-    songEntries.push(newEntry);
-  }
-  res.render("addToLivePlaylistConfirm.ejs", newEntry);
+  addSongToSession(newSong, req.params.sessionKey);
+
+  res.render("addToLivePlaylistConfirm.ejs", {
+    artist: newSong.artist,
+    title: newSong.title,
+    sessionKey: req.params.sessionKey,
+    url: newSong.url,
+  });
 });
 
-app.get("/live/:sessionId/remove", async (req, res) => {
-  songEntries = songEntries.filter(
-    entry =>
-      !(
-        entry.url === req.query.url && entry.sessionId === req.params.sessionId
-      ),
-  );
-  res.redirect(`/live/${req.params.sessionId}/add`);
+app.get("/live/:sessionKey/remove", async (req, res) => {
+  safeDeleteSongFromSession(req.query.url, req.params.sessionKey);
+  res.redirect(`/live/${req.params.sessionKey}/add`);
 });
 
-app.get("/live/:sessionId/plainText", async (req, res) => {
+app.get("/live/:sessionKey/plainText", async (req, res) => {
   res.send(
-    getAllPlaylistSongsForSession(req.params.sessionId).reduce(
+    getAllPlaylistSongsForSession(req.params.sessionKey).reduce(
       (acc, cur) => acc + cur.song.toString() + "<br />",
       "",
     ),
   );
 });
 
-app.get("/live/dump", async (req, res) => {
-  res.json(songEntries);
-});
-
-app.post("/live/restore", async (req, res) => {
-  songEntries = JSON.parse(req.body.songs);
-  res.end();
-});
-
-app.get("/live/:sessionId/setCurrent", async (req, res) => {
-  setIndex(req.params.sessionId, req.query.cur - 1);
-  res.json(getIndex(req.params.sessionId));
+app.get("/live/:sessionKey/setCurrent", async (req, res) => {
+  setSongToSpecificIndexOfActiveSongsForSession(
+    req.params.sessionKey,
+    req.query.cur,
+  );
+  res.json("updated");
 });
 
 app.listen(process.env["PORT"] || 3000, () =>
   console.log(`Tab writer app listening on port ${process.env["PORT"]}!`),
 );
 
-async function getCurrentPlaylistSong(sessionId) {
-  const songEntriesForSession = getAllPlaylistSongsForSession(sessionId);
-  console.log(songEntriesForSession);
-  if (songEntriesForSession.length === 0) return null;
-
-  if (getIndex(sessionId) + 1 > songEntriesForSession.length) {
-    setIndex(sessionId, songEntriesForSession.length - 1);
-  } else if (getIndex(sessionId) < 0) {
-    setIndex(sessionId, 0);
+async function getCurrentPlaylistSong(sessionKey) {
+  const song = await getCurrentActiveSongForSession(sessionKey);
+  if (!song) {
+    return null;
   }
 
-  const tab = await getTabForUrl(
-    songEntriesForSession[getIndex(sessionId)].url,
+  const totalActiveSongs = await getTotalNumberOfActiveSongsForSession(
+    sessionKey,
   );
+  const tab = formatTab(song.content);
   return {
+    artist: song.artist,
+    title: song.title,
+    tabUrl: song.url,
     tab,
-    current: getIndex(sessionId) + 1,
-    total: songEntriesForSession.length,
+    current: await getIndexOfCurrentSong(sessionKey),
+    total: totalActiveSongs,
   };
-}
-
-function getAllPlaylistSongsForSession(sessionId) {
-  return songEntries.filter(entry => entry.sessionId === sessionId);
-}
-
-function getIndex(sessionId) {
-  !curIndex[sessionId] && setIndex(sessionId, 0);
-  return curIndex[sessionId];
-}
-
-function setIndex(sessionId, newVal) {
-  curIndex[sessionId] = newVal;
 }

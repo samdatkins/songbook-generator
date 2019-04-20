@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Live Playlist</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css"
+    />
+    <script
+      defer
+      src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"
+    ></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="/scripts/livePlaylistNav.js"></script>
+    <script src="/scripts/jquery.qrcode.min.js"></script>
+    <link rel="stylesheet" href="/style/livePlaylist.css" />
+  </head>
+  <body>
+    <section class="section">
+      <div class="container" style="max-width: 1600px; width: 1600px;">
+        <h1>Welcome!</h1>
+        <br />
+        <form method="GET" action="/live/view">
+          <div class="field">
+            <label class="label">View Existing Songbook</label>
+            <div class="control">
+              <input class="input" name="sessionKey" type="text" />
+            </div>
+          </div>
+          <br />
+          <div class="control">
+            <button class="button is-link">Submit</button>
+          </div>
+        </form>
+        <hr />
+        <form method="POST" action="/live/create">
+          <div class="field">
+            <label class="label">Create New Songbook</label>
+            <div class="control">
+              <input class="input" name="sessionKey" type="text" />
+            </div>
+          </div>
+          <br />
+          <div class="control">
+            <button class="button is-link">Submit</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </body>
+</html>

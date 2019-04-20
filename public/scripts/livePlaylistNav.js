@@ -1,5 +1,5 @@
-const sessionIdRegex = new RegExp("live/(.*)/view");
-const sessionId = sessionIdRegex.exec(window.location.href)[1];
+const sessionKeyRegex = new RegExp("live/(.*)/view");
+const sessionKey = sessionKeyRegex.exec(window.location.href)[1];
 const songLength = 60;
 const waitLength = 7;
 const drinkLength = 7;
@@ -84,11 +84,11 @@ function tick() {
 function getPlaylist(action, verb) {
   playlistTimer.stop();
   $.ajax({
-    url: `/live/${sessionId}/${action}`,
+    url: `/live/${sessionKey}/${action}`,
     type: verb,
     success: function(result) {
-      const title = result.tab.artist + " - " + result.tab.name;
-      const tab = result.tab.content.text
+      const title = result.artist + " - " + result.title;
+      const tab = result.tab
         .split("\n")
         .slice(0, 90)
         .join("\n")
@@ -102,7 +102,7 @@ function getPlaylist(action, verb) {
           result.total
         }</span>)`,
       );
-      $("#songUrl").html(`${result.tab.url}`);
+      $("#songUrl").html(`<a href="${result.tabUrl}">${result.tabUrl}</a>`);
       $("#songTab").html(`${tab}`);
 
       playlistTimer.start();
@@ -123,7 +123,7 @@ function updateTotalSongs() {
   }
 
   $.ajax({
-    url: `/live/${sessionId}/count`,
+    url: `/live/${sessionKey}/count`,
     type: "GET",
     success: function(result) {
       $("#totalSongs").html(result.count);

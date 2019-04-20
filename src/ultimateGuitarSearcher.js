@@ -50,22 +50,22 @@ export async function getTabForUrl(url) {
         console.error(`Failed to find tab at URL: ${url}`);
         reject();
       } else {
-        resolve(formatTab(tab));
+        resolve(tab);
       }
     });
   });
 }
 
-function formatTab(tab) {
-  const tabLines = tab.content.text.split("\n");
+export function formatTab(tabContent) {
+  const tabLines = tabContent.split("\n");
   const firstLineOfChords = tabLines.findIndex(line => line.includes("[ch]"));
   const capoString = tabLines.find(line => line.toUpperCase().includes("CAPO"));
   const capoLine = capoString ? [capoString] : [];
 
   const textLines = capoLine.concat(
-    tab.content.text.split("\n").slice(firstLineOfChords, maxLinesPerSong),
+    tabContent.split("\n").slice(firstLineOfChords, maxLinesPerSong),
   );
 
-  tab.content.text = textLines.join("\n");
-  return tab;
+  tabContent = textLines.join("\n");
+  return tabContent;
 }
