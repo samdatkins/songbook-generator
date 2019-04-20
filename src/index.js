@@ -12,6 +12,7 @@ import {
   getCurrentActiveSongForSession,
   getIndexOfCurrentSong,
   getTotalNumberOfActiveSongsForSession,
+  isValidSongbookSession,
   safeDeleteSongFromSession,
   setSongToNextActiveSongForSession,
   setSongToPrevActiveSongForSession,
@@ -81,11 +82,22 @@ app.get("/live/:sessionKey/view", async (req, res) =>
   res.sendFile(path.join(__dirname, "../public", "/livePlaylist.html")),
 );
 
-app.get("/live/:sessionKey/add", async (req, res) =>
-  res.render("addToLivePlaylist.ejs", { sessionKey: req.params.sessionKey }),
-);
+app.get("/live/:sessionKey/add", async (req, res) => {
+  if (!(await isValidSongbookSession(req.params.sessionKey))) {
+    res.status(404);
+    return res.json("Invalid session key");
+  }
+
+  return res.render("addToLivePlaylist.ejs", {
+    sessionKey: req.params.sessionKey,
+  });
+});
 
 app.get("/live/:sessionKey/current", async (req, res) => {
+  if (!(await isValidSongbookSession(req.params.sessionKey))) {
+    res.status(404);
+    return res.json("Invalid session key");
+  }
   const curSong = await getCurrentPlaylistSong(req.params.sessionKey);
   if (!curSong) res.status(204);
   return res.json(curSong);
@@ -102,6 +114,13 @@ app.get("/live/view", async (req, res) => {
 });
 
 app.post("/live/create", async (req, res) => {
+  const alphaNumericAndDashesRegex = /^[0-9A-Za-z\-]+$/;
+  if (!req.body.sessionKey.match(alphaNumericAndDashesRegex)) {
+    res.status(400);
+    res.json(
+      "Illegal name! You may only use letters, numbers, and dashes (no spaces!)",
+    );
+  }
   await createNewSongbookSession(req.body.sessionKey);
   res.redirect(`/live/${req.body.sessionKey}/view`);
 });
@@ -117,6 +136,11 @@ app.post("/live/:sessionKey/prev", async (req, res) => {
 });
 
 app.post("/live/:sessionKey/add", async (req, res) => {
+  if (!(await isValidSongbookSession(req.params.sessionKey))) {
+    res.status(404);
+    return res.json("Invalid session key");
+  }
+
   const match = await getBestMatch(req.body.song);
   if (!match) {
     res.send(
@@ -171,6 +195,7 @@ app.listen(process.env["PORT"] || 3000, () =>
 
 async function getCurrentPlaylistSong(sessionKey) {
   const song = await getCurrentActiveSongForSession(sessionKey);
+
   if (!song) {
     return null;
   }

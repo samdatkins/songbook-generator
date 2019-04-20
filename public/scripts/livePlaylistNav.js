@@ -115,8 +115,18 @@ function getPlaylist(action, verb) {
 
       playlistTimer.start();
     },
-    error: function(result) {
-      alert("Failed to fetch playlist");
+    error: function(xhr, textStatus) {
+      console.log(xhr);
+      if (xhr.status === 404 && xhr.responseText === '"Invalid session key"') {
+        $("#songTitle").html(
+          `Invalid power hour session key, please create one <a href="/live">here</a>`,
+        );
+        $("#songTab").hide();
+        $("#qrcode").hide();
+        return;
+      } else {
+        alert("Failed to fetch playlist");
+      }
     },
     timeout: 5000,
   });

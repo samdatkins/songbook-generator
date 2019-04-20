@@ -63,6 +63,14 @@ export const getNumberOfSongsBeforeCurrentSong = async sessionKey => {
   );
 };
 
+export const isValidSongbookSession = async sessionKey => {
+  return !!(await knex
+    .select("current_song_timestamp")
+    .from("songbook")
+    .where("session_key", sessionKey)
+    .first());
+};
+
 export const getCurrentActiveSongForSession = async sessionKey => {
   try {
     const current_song_timestamp = await getCurrentSongBookmarkForSession(
