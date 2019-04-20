@@ -1,4 +1,4 @@
-import * as ugs from "ultimate-guitar-scraper";
+import * as ugs from "./tab-scraper";
 
 const maxLinesPerSong = 116;
 

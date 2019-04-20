@@ -19,11 +19,8 @@ import {
 } from "./db/repositories/songbook";
 import { processSongbook } from "./songbookCreator";
 import { getSpotifyPlaylistTracks } from "./spotifyPlaylistReader";
-import {
-  formatTab,
-  getBestMatch,
-  getTabForUrl,
-} from "./ultimateGuitarSearcher";
+import * as ugs from "./tab-scraper";
+import { formatTab, getBestMatch, getTabForUrl } from "./tabSearcher";
 
 dotenv.config();
 
@@ -66,6 +63,19 @@ app.get("/", (req, res) => res.redirect(`/live`));
 app.get("/live", (req, res) =>
   res.sendFile(path.join(__dirname, "../public", "/liveLanding.html")),
 );
+
+app.get("/live/tab-autocomplete", async (req, res) => {
+  const results = await new Promise((resolve, reject) => {
+    ugs.autocomplete(req.query.term, (error, tabs) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(tabs);
+      }
+    });
+  });
+  res.json(results);
+});
 
 app.get("/live/:sessionKey/view", async (req, res) =>
   res.sendFile(path.join(__dirname, "../public", "/livePlaylist.html")),
