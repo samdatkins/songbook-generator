@@ -71,6 +71,24 @@ export const isValidSongbookSession = async sessionKey => {
     .first());
 };
 
+export const isSongbookFull = async sessionKey => {
+  const { max_active_songs } = await knex
+    .select("max_active_songs")
+    .from("songbook")
+    .where("session_key", sessionKey)
+    .first();
+
+  const totalSongs = await getTotalNumberOfActiveSongsForSession(sessionKey);
+
+  return totalSongs >= max_active_songs;
+};
+
+export const setMaxSongsForSession = async (sessionKey, maxSongs) => {
+  return await knex("songbook")
+    .where("session_key", sessionKey)
+    .update("max_active_songs", maxSongs);
+};
+
 export const getCurrentActiveSongForSession = async sessionKey => {
   try {
     const current_song_timestamp = await getCurrentSongBookmarkForSession(
@@ -140,7 +158,7 @@ const getNextActiveSongForSession = async sessionKey => {
     .first();
 
   if (nextSong) return nextSong;
-  console.log("using current song, no next song");
+
   return getCurrentActiveSongForSession(sessionKey);
 };
 

@@ -12,8 +12,10 @@ import {
   getCurrentActiveSongForSession,
   getIndexOfCurrentSong,
   getTotalNumberOfActiveSongsForSession,
+  isSongbookFull,
   isValidSongbookSession,
   safeDeleteSongFromSession,
+  setMaxSongsForSession,
   setSongToNextActiveSongForSession,
   setSongToPrevActiveSongForSession,
   setSongToSpecificIndexOfActiveSongsForSession,
@@ -35,7 +37,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static("public"));
 
 app.post("/submit-tab", (req, res) => {
-  console.log(req.body.playlist);
   processSongbook(req.body.playlist, req.body.email);
   res.sendFile(path.join(__dirname, "../public", "/songbookProcessing.html"));
 });
@@ -135,10 +136,27 @@ app.post("/live/:sessionKey/prev", async (req, res) => {
   res.json(await getCurrentPlaylistSong(req.params.sessionKey));
 });
 
+app.get("/live/:sessionKey/setMaxSongs", async (req, res) => {
+  await setMaxSongsForSession(
+    req.params.sessionKey,
+    parseInt(req.query.maxSongs),
+  );
+  res.json(`Set max songs to ${req.query.maxSongs}`);
+});
+
 app.post("/live/:sessionKey/add", async (req, res) => {
   if (!(await isValidSongbookSession(req.params.sessionKey))) {
     res.status(404);
     return res.json("Invalid session key");
+  }
+
+  if (await isSongbookFull(req.params.sessionKey)) {
+    res.status(400);
+    return res.send(
+      `<p>Songbook full, no more requests allowed! </p><a href='/live/${
+        req.params.sessionKey
+      }/add><- Back</a>`,
+    );
   }
 
   const match = await getBestMatch(req.body.song);

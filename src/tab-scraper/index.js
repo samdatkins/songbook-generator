@@ -38,8 +38,6 @@ function autocomplete(query, callback, requestOptions) {
       callback(new Error("Bad response"));
     } else {
       try {
-        console.log(requestOptions.url);
-        console.log(body);
         const results = JSON.parse(body);
         if (results.hasOwnProperty("suggestions")) {
           callback(null, results["suggestions"], response, body);
@@ -75,5 +73,5 @@ function get(tabUrl, callback, requestOptions) {
 module.exports = {
   search,
   autocomplete,
-  get
+  get,
 };

@@ -116,7 +116,6 @@ function getPlaylist(action, verb) {
       playlistTimer.start();
     },
     error: function(xhr, textStatus) {
-      console.log(xhr);
       if (xhr.status === 404 && xhr.responseText === '"Invalid session key"') {
         $("#songTitle").html(
           `Invalid power hour session key, please create one <a href="/live">here</a>`,
