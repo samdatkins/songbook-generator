@@ -80,7 +80,7 @@ export const isSongbookFull = async sessionKey => {
 
   const totalSongs = await getTotalNumberOfActiveSongsForSession(sessionKey);
 
-  return totalSongs >= max_active_songs;
+  return max_active_songs && totalSongs >= max_active_songs;
 };
 
 export const setMaxSongsForSession = async (sessionKey, maxSongs) => {
