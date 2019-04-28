@@ -223,15 +223,16 @@ app.get("/live/:sessionKey/remove", async (req, res) => {
 });
 
 app.get("/live/:sessionKey/index", async (req, res) => {
-  console.log(await getAllActiveSongsForSession(req.params.sessionKey));
   var index = 0;
   return res.send(
     (await getAllActiveSongsForSession(req.params.sessionKey)).reduce(
       (acc, song) =>
         acc +
-        `<a href="/live/${req.params.sessionKey}/setCurrent?cur=${index++}">${
-          song.artist
-        } - ${song.title}</a>` +
+        `<a href="/live/${
+          req.params.sessionKey
+        }/setCurrent?cur=${index++}" target="_blank">${song.artist} - ${
+          song.title
+        }</a>` +
         "<br />",
       "",
     ),
@@ -243,7 +244,7 @@ app.get("/live/:sessionKey/setCurrent", async (req, res) => {
     req.params.sessionKey,
     req.query.cur,
   );
-  res.json("updated");
+  res.redirect(`/live/${req.params.sessionKey}/view`);
 });
 
 app.listen(process.env["PORT"] || 3000, () =>
