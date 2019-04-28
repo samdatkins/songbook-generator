@@ -51,6 +51,15 @@ export const getTotalNumberOfActiveSongsForSession = async sessionKey => {
     .first()).count;
 };
 
+export const getAllActiveSongsForSession = async sessionKey => {
+  return knex
+    .from("songbook")
+    .innerJoin("song_entry", "song_entry.songbook_id", "songbook.id")
+    .whereNull("song_entry.removed_at")
+    .andWhere("session_key", sessionKey)
+    .orderBy("song_entry.created_at");
+};
+
 export const getIndexOfCurrentSong = async sessionKey => {
   return (await getNumberOfSongsBeforeCurrentSong(sessionKey)) + 1;
 };

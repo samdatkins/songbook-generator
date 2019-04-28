@@ -9,6 +9,7 @@ import "./db/knexfile";
 import {
   addSongToSession,
   createNewSongbookSession,
+  getAllActiveSongsForSession,
   getCurrentActiveSongForSession,
   getIndexOfCurrentSong,
   getSongbookForSession,
@@ -221,10 +222,11 @@ app.get("/live/:sessionKey/remove", async (req, res) => {
   res.redirect(`/live/${req.params.sessionKey}/add`);
 });
 
-app.get("/live/:sessionKey/plainText", async (req, res) => {
-  res.send(
-    getAllPlaylistSongsForSession(req.params.sessionKey).reduce(
-      (acc, cur) => acc + cur.song.toString() + "<br />",
+app.get("/live/:sessionKey/dump", async (req, res) => {
+  console.log(await getAllActiveSongsForSession(req.params.sessionKey));
+  return res.send(
+    (await getAllActiveSongsForSession(req.params.sessionKey)).reduce(
+      (acc, song) => acc + `${song.artist} - ${song.title}` + "<br />",
       "",
     ),
   );
