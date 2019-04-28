@@ -122,6 +122,12 @@ app.post("/live/create", async (req, res) => {
       "Illegal name! You may only use letters, numbers, and dashes (no spaces!)",
     );
   }
+
+  if (await isValidSongbookSession(req.body.sessionKey)) {
+    res.status(400);
+    return res.json("Songbook already exists");
+  }
+
   await createNewSongbookSession(req.body.sessionKey);
   res.redirect(`/live/${req.body.sessionKey}/view`);
 });
