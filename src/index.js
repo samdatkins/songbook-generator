@@ -16,6 +16,7 @@ import {
   isSongbookFull,
   isValidSongbookSession,
   safeDeleteSongFromSession,
+  setLastNavActionToNow,
   setMaxSongsForSession,
   setSongToNextActiveSongForSession,
   setSongToPrevActiveSongForSession,
@@ -81,9 +82,17 @@ app.get("/live/tab-autocomplete", async (req, res) => {
 });
 
 app.get("/live/:sessionKey/view", async (req, res) => {
+  if (!(await isValidSongbookSession(req.params.sessionKey))) {
+    res.status(404);
+    return res.json("Invalid session key");
+  }
+
   const songbook = await getSongbookForSession(req.params.sessionKey);
+
+  setLastNavActionToNow(req.params.sessionKey);
+
   return res.render("viewLivePlaylist.ejs", {
-    sessionKey: songbook.sessionKey,
+    sessionKey: songbook.session_key,
     powerHourTitle: songbook.title,
   });
 });
@@ -97,7 +106,7 @@ app.get("/live/:sessionKey/add", async (req, res) => {
   const songbook = await getSongbookForSession(req.params.sessionKey);
 
   return res.render("addToLivePlaylist.ejs", {
-    sessionKey: songbook.sessionKey,
+    sessionKey: songbook.session_key,
     powerHourTitle: songbook.title,
   });
 });
@@ -140,7 +149,11 @@ app.post("/live/create", async (req, res) => {
     return res.json("Songbook already exists");
   }
 
-  await createNewSongbookSession(req.body.sessionKey, req.body.title);
+  await createNewSongbookSession(
+    req.body.sessionKey,
+    req.body.title,
+    req.body.maxSongLimit || null,
+  );
   res.redirect(`/live/${req.body.sessionKey}/view`);
 });
 

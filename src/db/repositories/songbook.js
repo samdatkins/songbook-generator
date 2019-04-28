@@ -1,13 +1,19 @@
+import { differenceInMilliseconds } from "date-fns";
 import { v4 as uuid } from "uuid";
 import knex from "../knexfile";
 
-export const createNewSongbookSession = async (sessionKey, title) => {
+export const createNewSongbookSession = async (
+  sessionKey,
+  title,
+  maxSongLimit,
+) => {
   return knex("songbook").insert({
     id: uuid(),
     created_at: new Date(),
     session_key: sessionKey,
     title: title,
     current_song_timestamp: new Date(),
+    max_active_songs: maxSongLimit,
   });
 };
 
@@ -110,7 +116,17 @@ export const getCurrentActiveSongForSession = async sessionKey => {
   }
 };
 
+export const setLastNavActionToNow = async sessionKey => {
+  return knex("songbook")
+    .where("session_key", sessionKey)
+    .update({
+      last_nav_action_taken_at: new Date(),
+    });
+};
+
 export const setSongToNextActiveSongForSession = async sessionKey => {
+  updatePlayStatisticsOnNav(sessionKey);
+
   const nextSong = await getNextActiveSongForSession(sessionKey);
 
   await knex("songbook")
@@ -123,6 +139,8 @@ export const setSongToSpecificIndexOfActiveSongsForSession = async (
   sessionKey,
   index,
 ) => {
+  updatePlayStatisticsOnNav(sessionKey);
+
   const specificSong = (await knex
     .from("songbook")
     .innerJoin("song_entry", "song_entry.songbook_id", "songbook.id")
@@ -137,6 +155,8 @@ export const setSongToSpecificIndexOfActiveSongsForSession = async (
 };
 
 export const setSongToPrevActiveSongForSession = async sessionKey => {
+  updatePlayStatisticsOnNav(sessionKey);
+
   const prevSong = await getPrevActiveSongForSession(sessionKey);
 
   await knex("songbook")
@@ -229,4 +249,28 @@ const isSongAlreadyInSongbook = async (song, songbookId) => {
     .count()
     .first();
   return matches && parseInt(matches.count) > 0;
+};
+
+const updatePlayStatisticsOnNav = async sessionKey => {
+  const songbook = await getSongbookForSession(sessionKey);
+  const currentSong = await getCurrentActiveSongForSession(sessionKey);
+
+  const elapsedTimeMS = Math.abs(
+    differenceInMilliseconds(songbook.last_nav_action_taken_at, new Date()),
+  );
+
+  const play_time = (currentSong.play_time || 0.0) + elapsedTimeMS / 1000.0;
+  const last_nav_action_taken_at = new Date();
+
+  await knex("songbook")
+    .where("id", songbook.id)
+    .update({
+      last_nav_action_taken_at,
+    });
+
+  await knex("song_entry")
+    .where("id", currentSong.id)
+    .update({
+      play_time,
+    });
 };
