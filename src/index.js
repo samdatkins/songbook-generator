@@ -11,6 +11,7 @@ import {
   createNewSongbookSession,
   getCurrentActiveSongForSession,
   getIndexOfCurrentSong,
+  getSongbookForSession,
   getTotalNumberOfActiveSongsForSession,
   isSongbookFull,
   isValidSongbookSession,
@@ -79,9 +80,13 @@ app.get("/live/tab-autocomplete", async (req, res) => {
   res.json(results);
 });
 
-app.get("/live/:sessionKey/view", async (req, res) =>
-  res.sendFile(path.join(__dirname, "../public", "/livePlaylist.html")),
-);
+app.get("/live/:sessionKey/view", async (req, res) => {
+  const songbook = await getSongbookForSession(req.params.sessionKey);
+  return res.render("viewLivePlaylist.ejs", {
+    sessionKey: songbook.sessionKey,
+    powerHourTitle: songbook.title,
+  });
+});
 
 app.get("/live/:sessionKey/add", async (req, res) => {
   if (!(await isValidSongbookSession(req.params.sessionKey))) {
@@ -89,8 +94,11 @@ app.get("/live/:sessionKey/add", async (req, res) => {
     return res.json("Invalid session key");
   }
 
+  const songbook = await getSongbookForSession(req.params.sessionKey);
+
   return res.render("addToLivePlaylist.ejs", {
-    sessionKey: req.params.sessionKey,
+    sessionKey: songbook.sessionKey,
+    powerHourTitle: songbook.title,
   });
 });
 
@@ -114,6 +122,10 @@ app.get("/live/view", async (req, res) => {
   res.redirect(`/live/${req.query.sessionKey}/view`);
 });
 
+app.get("/live/create", (req, res) =>
+  res.sendFile(path.join(__dirname, "../public", "/createSongbook.html")),
+);
+
 app.post("/live/create", async (req, res) => {
   const alphaNumericAndDashesRegex = /^[0-9A-Za-z\-]+$/;
   if (!req.body.sessionKey.match(alphaNumericAndDashesRegex)) {
@@ -128,7 +140,7 @@ app.post("/live/create", async (req, res) => {
     return res.json("Songbook already exists");
   }
 
-  await createNewSongbookSession(req.body.sessionKey);
+  await createNewSongbookSession(req.body.sessionKey, req.body.title);
   res.redirect(`/live/${req.body.sessionKey}/view`);
 });
 
@@ -214,7 +226,7 @@ app.get("/live/:sessionKey/setCurrent", async (req, res) => {
 });
 
 app.listen(process.env["PORT"] || 3000, () =>
-  console.log(`Tab writer app listening on port ${process.env["PORT"]}!`),
+  console.log(`Live Power Hour app listening on port ${process.env["PORT"]}!`),
 );
 
 async function getCurrentPlaylistSong(sessionKey) {

@@ -1,11 +1,12 @@
 import { v4 as uuid } from "uuid";
 import knex from "../knexfile";
 
-export const createNewSongbookSession = async sessionKey => {
+export const createNewSongbookSession = async (sessionKey, title) => {
   return knex("songbook").insert({
     id: uuid(),
     created_at: new Date(),
     session_key: sessionKey,
+    title: title,
     current_song_timestamp: new Date(),
   });
 };
@@ -143,6 +144,13 @@ export const setSongToPrevActiveSongForSession = async sessionKey => {
     .update("current_song_timestamp", prevSong.created_at);
 
   return prevSong;
+};
+
+export const getSongbookForSession = async sessionKey => {
+  return knex
+    .from("songbook")
+    .where("session_key", sessionKey)
+    .first();
 };
 
 const getNextActiveSongForSession = async sessionKey => {

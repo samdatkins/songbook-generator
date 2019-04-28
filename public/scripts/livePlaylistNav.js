@@ -11,8 +11,8 @@ var lastMaxSongUpdate = new Date();
 
 $(document).ready(function() {
   $("#qrcode").qrcode({
-    width: 120,
-    height: 120,
+    width: 240,
+    height: 240,
     text: window.location.href.replace("view", "add"),
   });
   $("#qrcodelink").attr("href", window.location.href.replace("view", "add"));

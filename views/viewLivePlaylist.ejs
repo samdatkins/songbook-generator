@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Live Playlist</title>
+    <title>Live Playlist - <%= powerHourTitle %></title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css"
@@ -21,12 +21,12 @@
     <section class="section">
       <div class="container" style="max-width: 1600px; width: 1600px;">
         <a href="" id="qrcodelink">
-          <div
-            id="qrcode"
-            style="position: absolute; top: -36px; right:360px; z-index: 3;"
-          ></div>
+          <div id="qrcode"></div>
         </a>
         <div style="float:right;" id="timerCountdown"></div>
+        <p class="title has-text-grey" id="songbookTitle">
+          <%= powerHourTitle %>
+        </p>
         <h1 class="title" id="songTitle"></h1>
         <p class="subtitle" id="songUrl"></p>
         <pre id="songTab"></pre>

@@ -14,3 +14,19 @@
   font-size: 3.5em;
   float: right;
 }
+
+#songbookTitle {
+  position: absolute;
+  top: 0px;
+  left: 820px;
+  z-index: 3;
+  text-transform: uppercase;
+}
+
+#qrcode {
+  position: absolute;
+  top: 90px;
+  right: 0px;
+  z-index: 3;
+  opacity: 0.5;
+}
