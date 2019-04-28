@@ -222,11 +222,17 @@ app.get("/live/:sessionKey/remove", async (req, res) => {
   res.redirect(`/live/${req.params.sessionKey}/add`);
 });
 
-app.get("/live/:sessionKey/dump", async (req, res) => {
+app.get("/live/:sessionKey/index", async (req, res) => {
   console.log(await getAllActiveSongsForSession(req.params.sessionKey));
+  var index = 0;
   return res.send(
     (await getAllActiveSongsForSession(req.params.sessionKey)).reduce(
-      (acc, song) => acc + `${song.artist} - ${song.title}` + "<br />",
+      (acc, song) =>
+        acc +
+        `<a href="/live/${req.params.sessionKey}/setCurrent?cur=${index++}">${
+          song.artist
+        } - ${song.title}</a>` +
+        "<br />",
       "",
     ),
   );
