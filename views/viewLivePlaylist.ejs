@@ -16,6 +16,11 @@
     <script src="/scripts/livePlaylistNav.js"></script>
     <script src="/scripts/jquery.qrcode.min.js"></script>
     <link rel="stylesheet" href="/style/livePlaylist.css" />
+    <% if (noodleMode === true) { %>
+      <script>
+        window.noodleMode = <%= noodleMode %>;
+      </script>
+    <% } %>
   </head>
   <body>
     <section class="section">

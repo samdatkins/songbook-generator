@@ -6,6 +6,7 @@ export const createNewSongbookSession = async (
   sessionKey,
   title,
   maxSongLimit,
+  isNoodleMode,
 ) => {
   return knex("songbook").insert({
     id: uuid(),
@@ -14,6 +15,7 @@ export const createNewSongbookSession = async (
     title: title,
     current_song_timestamp: new Date(),
     max_active_songs: maxSongLimit,
+    is_noodle_mode: isNoodleMode,
   });
 };
 
@@ -105,6 +107,12 @@ export const setMaxSongsForSession = async (sessionKey, maxSongs) => {
     .update("max_active_songs", maxSongs);
 };
 
+export const setNoodleModeForSession = async (sessionKey, isNoodleMode) => {
+  return await knex("songbook")
+    .where("session_key", sessionKey)
+    .update("is_noodle_mode", isNoodleMode);
+};
+
 export const getCurrentActiveSongForSession = async sessionKey => {
   try {
     const current_song_timestamp = await getCurrentSongBookmarkForSession(
@@ -137,7 +145,6 @@ export const setSongToNextActiveSongForSession = async sessionKey => {
   updatePlayStatisticsOnNav(sessionKey);
 
   const nextSong = await getNextActiveSongForSession(sessionKey);
-
   await knex("songbook")
     .where("session_key", sessionKey)
     .update("current_song_timestamp", nextSong.created_at);
@@ -160,7 +167,7 @@ export const setSongToSpecificIndexOfActiveSongsForSession = async (
   await knex("songbook")
     .where("session_key", sessionKey)
     .update("current_song_timestamp", specificSong.created_at);
-  return nextSong;
+  return specificSong;
 };
 
 export const setSongToPrevActiveSongForSession = async sessionKey => {

@@ -1,7 +1,5 @@
 import * as ugs from "./tab-scraper";
 
-const maxLinesPerSong = 116;
-
 export async function getBestMatch(term) {
   var matches;
   try {
@@ -56,7 +54,7 @@ export async function getTabForUrl(url) {
   });
 }
 
-export function formatTab(tabContent) {
+export function formatTab(tabContent, maxLinesPerSong) {
   const tabLines = tabContent.split("\n");
   const firstLineOfChords = tabLines.findIndex(line => line.includes("[ch]"));
   const capoString = tabLines.find(line => line.toUpperCase().includes("CAPO"));

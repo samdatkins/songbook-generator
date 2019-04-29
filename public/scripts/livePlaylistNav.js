@@ -17,6 +17,11 @@ $(document).ready(function() {
   });
   $("#qrcodelink").attr("href", window.location.href.replace("view", "add"));
 
+  if (window.noodleMode) {
+    playlistTimer.stop();
+    playlistTimer.toggleDisabled();
+  }
+
   getPlaylist("current", "GET");
   $("body").keydown(function(e) {
     if (e.keyCode == 37) {
@@ -25,11 +30,15 @@ $(document).ready(function() {
     } else if (e.keyCode == 39) {
       // right
       getPlaylist("next", "POST");
-    } else if (e.keyCode == 32 && e.target == document.body) {
+    } else if (
+      e.keyCode == 32 &&
+      e.target == document.body &&
+      !window.noodleMode
+    ) {
       // space
       playlistTimer.togglePause();
       e.preventDefault();
-    } else if (e.keyCode == 27) {
+    } else if (e.keyCode == 27 && !window.noodleMode) {
       // escape
       playlistTimer.stop();
       playlistTimer.toggleDisabled();
@@ -98,7 +107,6 @@ function getPlaylist(action, verb) {
       const title = result.artist + " - " + result.title;
       const tab = result.tab
         .split("\n")
-        .slice(0, 90)
         .join("\n")
         .replace(/\r\n/g, "<br />")
         .replace(/\n/g, "<br />")

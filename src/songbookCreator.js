@@ -1,7 +1,9 @@
 import * as fs from "fs";
 import { sendEmail } from "./emailClient";
-import { TabWriter } from "./tabWriter";
 import { getBestMatch, getTabForUrl } from "./tabSearcher";
+import { TabWriter } from "./tabWriter";
+
+const WEB_MAX_LINES_PER_SONG = 116;
 
 export async function processSongbook(playlistFile, toEmailAddress) {
   const songArray = playlistFile.split("\n");
@@ -22,7 +24,7 @@ export async function processSongbook(playlistFile, toEmailAddress) {
       ? (tab = await getTabForUrl(override.urlOverride))
       : (tab = await getTabForSong(song, tabWriter));
 
-    tab && tabWriter.writeTabToDoc(tab);
+    tab && tabWriter.writeTabToDoc(formatTab(tab, WEB_MAX_LINES_PER_SONG));
   }
 
   const tabAttachment = await tabWriter.getDocAsBase64String();

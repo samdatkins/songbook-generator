@@ -19,6 +19,7 @@ import {
   safeDeleteSongFromSession,
   setLastNavActionToNow,
   setMaxSongsForSession,
+  setNoodleModeForSession,
   setSongToNextActiveSongForSession,
   setSongToPrevActiveSongForSession,
   setSongToSpecificIndexOfActiveSongsForSession,
@@ -95,6 +96,7 @@ app.get("/live/:sessionKey/view", async (req, res) => {
   return res.render("viewLivePlaylist.ejs", {
     sessionKey: songbook.session_key,
     powerHourTitle: songbook.title,
+    noodleMode: songbook.is_noodle_mode,
   });
 });
 
@@ -117,7 +119,12 @@ app.get("/live/:sessionKey/current", async (req, res) => {
     res.status(404);
     return res.json("Invalid session key");
   }
-  const curSong = await getCurrentPlaylistSong(req.params.sessionKey);
+  const songbook = await getSongbookForSession(req.params.sessionKey);
+
+  const curSong = await getCurrentPlaylistSong(
+    req.params.sessionKey,
+    songbook.is_noodle_mode,
+  );
   if (!curSong) res.status(204);
   return res.json(curSong);
 });
@@ -154,26 +161,33 @@ app.post("/live/create", async (req, res) => {
     req.body.sessionKey,
     req.body.title,
     req.body.maxSongLimit || null,
+    req.body.isNoodleMode === "on",
   );
   res.redirect(`/live/${req.body.sessionKey}/view`);
 });
 
 app.post("/live/:sessionKey/next", async (req, res) => {
   await setSongToNextActiveSongForSession(req.params.sessionKey);
-  res.json(await getCurrentPlaylistSong(req.params.sessionKey));
+  const songbook = await getSongbookForSession(req.params.sessionKey);
+
+  res.json(
+    await getCurrentPlaylistSong(
+      req.params.sessionKey,
+      songbook.is_noodle_mode,
+    ),
+  );
 });
 
 app.post("/live/:sessionKey/prev", async (req, res) => {
   await setSongToPrevActiveSongForSession(req.params.sessionKey);
-  res.json(await getCurrentPlaylistSong(req.params.sessionKey));
-});
+  const songbook = await getSongbookForSession(req.params.sessionKey);
 
-app.get("/live/:sessionKey/setMaxSongs", async (req, res) => {
-  await setMaxSongsForSession(
-    req.params.sessionKey,
-    parseInt(req.query.maxSongs),
+  res.json(
+    await getCurrentPlaylistSong(
+      req.params.sessionKey,
+      songbook.is_noodle_mode,
+    ),
   );
-  res.json(`Set max songs to ${req.query.maxSongs}`);
 });
 
 app.post("/live/:sessionKey/add", async (req, res) => {
@@ -247,11 +261,37 @@ app.get("/live/:sessionKey/setCurrent", async (req, res) => {
   res.redirect(`/live/${req.params.sessionKey}/view`);
 });
 
+app.get("/live/:sessionKey/setMaxSongs", async (req, res) => {
+  await setMaxSongsForSession(
+    req.params.sessionKey,
+    parseInt(req.query.maxSongs),
+  );
+  res.json(`Set max songs to ${req.query.maxSongs}`);
+});
+
+app.get("/live/:sessionKey/setNoodleMode", async (req, res) => {
+  const isNoodleMode = req.query.noodleMode.toLowerCase() === "true";
+  await setNoodleModeForSession(req.params.sessionKey, isNoodleMode);
+  res.json(`Set noodleMode to ${isNoodleMode}`);
+});
+
 app.listen(process.env["PORT"] || 3000, () =>
   console.log(`Live Power Hour app listening on port ${process.env["PORT"]}!`),
 );
 
-async function getCurrentPlaylistSong(sessionKey) {
+app.get("/help", async (req, res) => {
+  res.send(`/live/{sessionKey}/setMaxSongs?maxSongs={numberOfSongs}<br>
+  /live/{sessionKey}/setNoodleMode?noodleMode={true/false}<br>
+  /live/{sessionKey}/index<br>
+  /live/{sessionKey}/remove?url={url pasted directly from the view page}<br><br>
+  Old stuff:<br>
+  /playlistGenerator<br>
+  /billboardTopPlaylist?startYear={1990}&endYear={2000}&count={60}&email={you@gmail.com}<br>
+  /spotifyPlaylist<br>`);
+});
+
+const WEB_MAX_LINES_PER_SONG = 90;
+async function getCurrentPlaylistSong(sessionKey, isNoodleMode = false) {
   const song = await getCurrentActiveSongForSession(sessionKey);
 
   if (!song) {
@@ -261,7 +301,12 @@ async function getCurrentPlaylistSong(sessionKey) {
   const totalActiveSongs = await getTotalNumberOfActiveSongsForSession(
     sessionKey,
   );
-  const tab = formatTab(song.content);
+
+  const tab = formatTab(
+    song.content,
+    isNoodleMode ? 9999 : WEB_MAX_LINES_PER_SONG,
+  );
+
   return {
     artist: song.artist,
     title: song.title,
