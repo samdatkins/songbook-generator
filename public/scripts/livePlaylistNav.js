@@ -22,14 +22,19 @@ $(document).ready(function() {
     playlistTimer.toggleDisabled();
   }
 
-  getPlaylist("current", "GET");
+  takePlaylistAction("current", "GET");
   $("body").keydown(function(e) {
     if (e.keyCode == 37) {
       // left
-      getPlaylist("prev", "POST");
+      takePlaylistAction("prev", "POST");
     } else if (e.keyCode == 39) {
       // right
-      getPlaylist("next", "POST");
+      takePlaylistAction("next", "POST");
+    } else if (e.keyCode == 46) {
+      // delete
+      takePlaylistAction("remove", "POST", {
+        url: $("#songUrl a").attr("href"),
+      });
     } else if (
       e.keyCode == 32 &&
       e.target == document.body &&
@@ -87,14 +92,15 @@ function tick() {
   $("#timerCountdown").html(displayString);
 
   if (countdown <= 0) {
-    getPlaylist("next", "POST");
+    takePlaylistAction("next", "POST");
   }
 }
 
-function getPlaylist(action, verb) {
+function takePlaylistAction(action, verb, params = {}) {
   playlistTimer.stop();
   $.ajax({
     url: `/live/${sessionKey}/${action}`,
+    data: params,
     type: verb,
     success: function(result, textStatus, xhr) {
       if (xhr.status === 204) {

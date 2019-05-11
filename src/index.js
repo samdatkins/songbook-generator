@@ -231,6 +231,26 @@ app.post("/live/:sessionKey/add", async (req, res) => {
   });
 });
 
+// used by viewer, should eventually be only endpoint
+app.post("/live/:sessionKey/remove", async (req, res) => {
+  if (!(await isValidSongbookSession(req.params.sessionKey))) {
+    res.status(404);
+    return res.json("Invalid session key");
+  }
+
+  await safeDeleteSongFromSession(req.body.url, req.params.sessionKey);
+
+  const songbook = await getSongbookForSession(req.params.sessionKey);
+
+  const curSong = await getCurrentPlaylistSong(
+    req.params.sessionKey,
+    songbook.is_noodle_mode,
+  );
+  if (!curSong) res.status(204);
+  return res.json(curSong);
+});
+
+// used by phones, hack because it's easier to do query strings in dumb html/js
 app.get("/live/:sessionKey/remove", async (req, res) => {
   safeDeleteSongFromSession(req.query.url, req.params.sessionKey);
   res.redirect(`/live/${req.params.sessionKey}/add`);

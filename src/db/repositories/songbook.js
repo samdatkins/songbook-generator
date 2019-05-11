@@ -114,23 +114,30 @@ export const setNoodleModeForSession = async (sessionKey, isNoodleMode) => {
 };
 
 export const getCurrentActiveSongForSession = async sessionKey => {
-  try {
-    const current_song_timestamp = await getCurrentSongBookmarkForSession(
-      sessionKey,
-    );
+  const current_song_timestamp = await getCurrentSongBookmarkForSession(
+    sessionKey,
+  );
 
-    return knex
-      .from("songbook")
-      .innerJoin("song_entry", "song_entry.songbook_id", "songbook.id")
-      .whereNull("song_entry.removed_at")
-      .andWhere("session_key", sessionKey)
-      .andWhere("song_entry.created_at", ">=", current_song_timestamp)
-      .orderBy("song_entry.created_at")
-      .first();
-  } catch {
-    console.log(`Couldn't find session ${sessionKey}`);
-    return null;
-  }
+  // get next song in playlist
+  const curSong = await knex
+    .from("songbook")
+    .innerJoin("song_entry", "song_entry.songbook_id", "songbook.id")
+    .whereNull("song_entry.removed_at")
+    .andWhere("session_key", sessionKey)
+    .andWhere("song_entry.created_at", ">=", current_song_timestamp)
+    .orderBy("song_entry.created_at")
+    .first();
+
+  if (curSong) return curSong;
+
+  // if there are no songs after the "bookmark", just return the last song
+  return await knex
+    .from("songbook")
+    .innerJoin("song_entry", "song_entry.songbook_id", "songbook.id")
+    .whereNull("song_entry.removed_at")
+    .andWhere("session_key", sessionKey)
+    .orderBy("song_entry.created_at", "desc")
+    .first();
 };
 
 export const setLastNavActionToNow = async sessionKey => {
