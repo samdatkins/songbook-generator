@@ -1,41 +1,43 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Live Playlist - <%= powerHourTitle %></title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css"
-    />
-    <script
-      defer
-      src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"
-    ></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="/scripts/livePlaylistNav.js"></script>
-    <script src="/scripts/jquery.qrcode.min.js"></script>
-    <link rel="stylesheet" href="/style/livePlaylist.css" />
-    <% if (noodleMode === true) { %>
-    <script>
-      window.noodleMode = <%= noodleMode %>;
-    </script>
-    <% } %>
-  </head>
-  <body>
-    <section class="section">
-      <div id="tabView" class="container">
-        <a href="" id="qrcodelink">
-          <div id="qrcode"></div>
-        </a>
-        <div style="float:right;" id="timerCountdown"></div>
-        <p class="title has-text-grey" id="songbookTitle">
-          <%= powerHourTitle %>
-        </p>
-        <h1 class="title" id="songTitle"></h1>
-        <p class="subtitle" id="songUrl"></p>
-        <pre id="songTab"></pre>
-      </div>
-    </section>
-  </body>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Live Playlist - <%= powerHourTitle %></title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css" />
+  <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="/scripts/livePlaylistNav.js"></script>
+  <script src="/scripts/jquery.qrcode.min.js"></script>
+  <link rel="stylesheet" href="/style/livePlaylist.css" />
+  <% if (noodleMode === true) { %>
+  <script>
+    window.noodleMode = <%= noodleMode %>;
+  </script>
+  <% } %>
+
+</head>
+
+<body>
+  <section class="section">
+    <div id="tabView" class="container">
+      <a href="" id="qrcodelink">
+        <div id="qrcode"></div>
+      </a>
+      <div style="float:right;" id="timerCountdown"></div>
+      <p class="title has-text-grey" id="songbookTitle">
+        <%= powerHourTitle %>
+      </p>
+      <% if (noodleMode === true) { %>
+      <p><a href="prev"><i class="fas fa-arrow-left"></i> Previous Song</a> || <a href="index">Index</a> || <a
+          href="next">Next Song <i class="fas fa-arrow-right"></a></i></p>
+      <% } %>
+      <h1 class="title" id="songTitle"></h1>
+      <p class="subtitle" id="songUrl"></p>
+      <pre id="songTab"></pre>
+    </div>
+  </section>
+</body>
+
 </html>

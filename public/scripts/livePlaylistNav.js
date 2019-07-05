@@ -16,6 +16,7 @@ $(document).ready(function() {
     text: window.location.href.replace("view", "add"),
   });
   $("#qrcodelink").attr("href", window.location.href.replace("view", "add"));
+  $("#qrcodelink").attr("target", "_blank");
 
   if (window.noodleMode) {
     playlistTimer.stop();
@@ -104,7 +105,7 @@ function takePlaylistAction(action, verb, params = {}) {
     type: verb,
     success: function(result, textStatus, xhr) {
       if (xhr.status === 204) {
-        $("#songTitle").html(`No songs! Add some by clicking the QR code ->`);
+        $("#songTitle").html(`<a href="add" target="_blank">No songs! Add some by clicking the QR code -></a>`);
         $("#songTab").hide();
         return;
       }
