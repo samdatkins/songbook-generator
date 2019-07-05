@@ -31,6 +31,8 @@ import { formatTab, getBestMatch, getTabForUrl } from "./tabSearcher";
 
 dotenv.config();
 
+const alphaRegex = /[^0-9A-Za-z\ ]+/g;
+
 const app = express();
 process.env["REQUIRE_HTTPS"] !== "false" &&
   app.use(enforce.HTTPS({ trustProtoHeader: true }));
@@ -72,7 +74,7 @@ app.get("/live", (req, res) =>
 
 app.get("/live/tab-autocomplete", async (req, res) => {
   const results = await new Promise((resolve, reject) => {
-    ugs.autocomplete(req.query.term, (error, tabs) => {
+    ugs.autocomplete(req.query.term.replace(alphaRegex, ""), (error, tabs) => {
       if (error) {
         reject(error);
       } else {
@@ -166,6 +168,16 @@ app.post("/live/create", async (req, res) => {
   res.redirect(`/live/${req.body.sessionKey}/view`);
 });
 
+app.get("/live/:sessionKey/next", async (req, res) => {
+  await setSongToNextActiveSongForSession(req.params.sessionKey);
+  res.redirect(`/live/${req.params.sessionKey}/view`);
+});
+
+app.get("/live/:sessionKey/prev", async (req, res) => {
+  await setSongToPrevActiveSongForSession(req.params.sessionKey);
+  res.redirect(`/live/${req.params.sessionKey}/view`);
+});
+
 app.post("/live/:sessionKey/next", async (req, res) => {
   await setSongToNextActiveSongForSession(req.params.sessionKey);
   const songbook = await getSongbookForSession(req.params.sessionKey);
@@ -205,7 +217,7 @@ app.post("/live/:sessionKey/add", async (req, res) => {
     );
   }
 
-  const match = await getBestMatch(req.body.song);
+  const match = await getBestMatch(req.body.song.replace(alphaRegex, ""));
   if (!match) {
     res.send(
       `<p>No matches found :(</p><a href='/live/${
