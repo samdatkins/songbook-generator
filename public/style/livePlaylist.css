@@ -5,7 +5,7 @@
 #songTab {
   font-size: 13px;
   font-family: Roboto Mono, monospace;
-  column-count: 2;
+  column-count: 1;
   column-gap: 10px;
   column-rule: 1px solid black;
 }
@@ -15,18 +15,29 @@
   float: right;
 }
 
-#songbookTitle {
-  position: absolute;
-  top: 0px;
-  left: 820px;
-  z-index: 3;
-  text-transform: uppercase;
-}
+@media screen and (min-width: 1900px) {
+  .tabView {
+    max-width: 1600px !important;
+    width: 1600px !important;
+  }
 
-#qrcode {
-  position: absolute;
-  top: 90px;
-  right: 0px;
-  z-index: 3;
-  opacity: 0.5;
+  #songTab {
+    column-count: 2;
+  }
+
+  #qrcode {
+    position: absolute;
+    top: 90px;
+    right: 0px;
+    z-index: 3;
+    opacity: 0.5;
+  }
+
+  #songbookTitle {
+    position: absolute;
+    top: 0px;
+    left: 820px;
+    z-index: 3;
+    text-transform: uppercase;
+  }
 }

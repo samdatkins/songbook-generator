@@ -17,14 +17,14 @@
     <script src="/scripts/jquery.qrcode.min.js"></script>
     <link rel="stylesheet" href="/style/livePlaylist.css" />
     <% if (noodleMode === true) { %>
-      <script>
-        window.noodleMode = <%= noodleMode %>;
-      </script>
+    <script>
+      window.noodleMode = <%= noodleMode %>;
+    </script>
     <% } %>
   </head>
   <body>
     <section class="section">
-      <div class="container" style="max-width: 1600px; width: 1600px;">
+      <div id="tabView" class="container">
         <a href="" id="qrcodelink">
           <div id="qrcode"></div>
         </a>
