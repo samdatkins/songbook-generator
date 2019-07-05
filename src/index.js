@@ -6,7 +6,24 @@ import enforce from "express-sslify";
 import path from "path";
 import { getMostPopularSongsForTimePeriod } from "./billboardTopHundredAggregator";
 import "./db/knexfile";
-import { addSongToSession, createNewSongbookSession, getAllActiveSongsForSession, getCurrentActiveSongForSession, getIndexOfCurrentSong, getSongbookForSession, getTotalNumberOfActiveSongsForSession, isSongbookFull, isValidSongbookSession, safeDeleteSongFromSession, setLastNavActionToNow, setMaxSongsForSession, setNoodleModeForSession, setSongToNextActiveSongForSession, setSongToPrevActiveSongForSession, setSongToSpecificIndexOfActiveSongsForSession } from "./db/repositories/songbook";
+import {
+  addSongToSession,
+  createNewSongbookSession,
+  getAllActiveSongsForSession,
+  getCurrentActiveSongForSession,
+  getIndexOfCurrentSong,
+  getSongbookForSession,
+  getTotalNumberOfActiveSongsForSession,
+  isSongbookFull,
+  isValidSongbookSession,
+  safeDeleteSongFromSession,
+  setLastNavActionToNow,
+  setMaxSongsForSession,
+  setNoodleModeForSession,
+  setSongToNextActiveSongForSession,
+  setSongToPrevActiveSongForSession,
+  setSongToSpecificIndexOfActiveSongsForSession,
+} from "./db/repositories/songbook";
 import { processSongbook } from "./songbookCreator";
 import { getSpotifyPlaylistTracks } from "./spotifyPlaylistReader";
 import * as ugs from "./tab-scraper";
@@ -196,7 +213,7 @@ app.post("/live/:sessionKey/add", async (req, res) => {
     res.status(400);
     return res.send(
       `<p>Songbook full, no more requests allowed! </p><a href='/live/${
-      req.params.sessionKey
+        req.params.sessionKey
       }/add><- Back</a>`,
     );
   }
@@ -205,7 +222,7 @@ app.post("/live/:sessionKey/add", async (req, res) => {
   if (!match) {
     res.send(
       `<p>No matches found :(</p><a href='/live/${
-      req.params.sessionKey
+        req.params.sessionKey
       }/add><- Back</a>`,
     );
   }
@@ -258,11 +275,9 @@ app.get("/live/:sessionKey/index", async (req, res) => {
     (await getAllActiveSongsForSession(req.params.sessionKey)).reduce(
       (acc, song) =>
         acc +
-        `<a href="/live/${
-        req.params.sessionKey
-        }/setCurrent?cur=${index++}" target="_blank">${song.artist} - ${
-        song.title
-        }</a>` +
+        `<a href="/live/${req.params.sessionKey}/setCurrent?cur=${index++}">${
+          song.artist
+        } - ${song.title}</a>` +
         "<br />",
       "",
     ),
