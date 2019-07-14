@@ -12,6 +12,7 @@ import {
   getAllActiveSongsForSession,
   getCurrentActiveSongForSession,
   getIndexOfCurrentSong,
+  getSong,
   getSongbookForSession,
   getTotalNumberOfActiveSongsForSession,
   isSongbookFull,
@@ -23,6 +24,7 @@ import {
   setSongToNextActiveSongForSession,
   setSongToPrevActiveSongForSession,
   setSongToSpecificIndexOfActiveSongsForSession,
+  updateSong,
 } from "./db/repositories/songbook";
 import { processSongbook } from "./songbookCreator";
 import { getSpotifyPlaylistTracks } from "./spotifyPlaylistReader";
@@ -244,7 +246,24 @@ app.post("/live/:sessionKey/add", async (req, res) => {
   });
 });
 
-// used by viewer, should eventually be only endpoint
+app.get("/live/songs/:url/edit", async (req, res) => {
+  const song = await getSong(req.params.url);
+  res.render("editSong.ejs", {
+    artist: song.artist,
+    title: song.title,
+    url: song.url,
+    content: song.content,
+  });
+});
+
+// this really should be a PUT but I'm using straight HTML to submit it so it's
+// a post
+app.post("/live/songs/:url/edit", async (req, res) => {
+  await updateSong(req.params.url, req.body.content);
+  return res.json("success");
+});
+
+// used by viewer, should eventually be only endpoint (e.g. remove the get version)
 app.post("/live/:sessionKey/remove", async (req, res) => {
   if (!(await isValidSongbookSession(req.params.sessionKey))) {
     res.status(404);
@@ -278,6 +297,8 @@ app.get("/live/:sessionKey/index", async (req, res) => {
         `<a href="/live/${req.params.sessionKey}/setCurrent?cur=${index++}">${
           song.artist
         } - ${song.title}</a>` +
+        " - " +
+        `<a href="/live/songs/${encodeURIComponent(song.url)}/edit">edit</a>` +
         "<br />",
       "",
     ),

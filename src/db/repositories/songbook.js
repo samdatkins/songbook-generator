@@ -19,6 +19,19 @@ export const createNewSongbookSession = async (
   });
 };
 
+export const getSong = async url => {
+  return await knex
+    .from("song")
+    .where("url", url)
+    .first();
+};
+
+export const updateSong = async (url, content) => {
+  await knex("song")
+    .update({ content })
+    .where({ url });
+};
+
 export const addSongToSession = async (newSong, sessionKey) => {
   const songbook_id = await getSongbookIdForSession(sessionKey);
 
@@ -26,20 +39,27 @@ export const addSongToSession = async (newSong, sessionKey) => {
 
   console.log("adding song");
 
-  return knex("song_entry").insert({
-    ...newSong,
+  let songInDb = await getSong(newSong.url);
+  if (!songInDb) {
+    songInDb = await addSongToDb(newSong);
+  }
+
+  await knex("song_entry").insert({
     id: uuid(),
     created_at: new Date(),
     songbook_id,
+    song_id: songInDb.id,
   });
 };
 
 export const safeDeleteSongFromSession = async (url, sessionKey) => {
   const songbook_id = await getSongbookIdForSession(sessionKey);
 
+  const songInDb = await getSong(url);
+
   return knex("song_entry")
     .where("songbook_id", songbook_id)
-    .andWhere("url", url)
+    .andWhere("song_id", songInDb.id)
     .update("removed_at", new Date());
 };
 
@@ -59,6 +79,7 @@ export const getAllActiveSongsForSession = async sessionKey => {
     .innerJoin("song_entry", "song_entry.songbook_id", "songbook.id")
     .whereNull("song_entry.removed_at")
     .andWhere("session_key", sessionKey)
+    .innerJoin("song", "song_entry.song_id", "song.id")
     .orderBy("song_entry.created_at");
 };
 
@@ -125,6 +146,7 @@ export const getCurrentActiveSongForSession = async sessionKey => {
     .whereNull("song_entry.removed_at")
     .andWhere("session_key", sessionKey)
     .andWhere("song_entry.created_at", ">=", current_song_timestamp)
+    .innerJoin("song", "song_entry.song_id", "song.id")
     .orderBy("song_entry.created_at")
     .first();
 
@@ -136,6 +158,7 @@ export const getCurrentActiveSongForSession = async sessionKey => {
     .innerJoin("song_entry", "song_entry.songbook_id", "songbook.id")
     .whereNull("song_entry.removed_at")
     .andWhere("session_key", sessionKey)
+    .innerJoin("song", "song_entry.song_id", "song.id")
     .orderBy("song_entry.created_at", "desc")
     .first();
 };
@@ -205,6 +228,7 @@ const getNextActiveSongForSession = async sessionKey => {
     .whereNull("song_entry.removed_at")
     .andWhere("session_key", sessionKey)
     .andWhere("song_entry.created_at", ">", currentSong.created_at)
+    .innerJoin("song", "song_entry.song_id", "song.id")
     .orderBy("song_entry.created_at")
     .first();
 
@@ -222,6 +246,7 @@ const getPrevActiveSongForSession = async sessionKey => {
     .whereNull("song_entry.removed_at")
     .andWhere("session_key", sessionKey)
     .andWhere("song_entry.created_at", "<", currentSong.created_at)
+    .innerJoin("song", "song_entry.song_id", "song.id")
     .orderBy("song_entry.created_at", "desc")
     .first();
 
@@ -256,22 +281,27 @@ const getSongbookIdForSession = async sessionKey => {
 };
 
 const isSongAlreadyInSongbook = async (song, songbookId) => {
+  const songInDb = await getSong(song.url);
+  if (!songInDb) return;
   const matches = await knex
     .from("song_entry")
     .whereNull("song_entry.removed_at")
     .where("songbook_id", songbookId)
-    .andWhere(builder =>
-      builder
-        .where("url", song.url)
-        .orWhere(innerBuilder =>
-          innerBuilder
-            .where("artist", song.artist)
-            .andWhere("title", song.title),
-        ),
-    )
+    .andWhere("song_id", songInDb.id)
     .count()
     .first();
   return matches && parseInt(matches.count) > 0;
+};
+
+const addSongToDb = async song => {
+  const addedSong = await knex("song")
+    .insert({
+      ...song,
+      id: uuid(),
+    })
+    .returning("*");
+
+  return addedSong[0];
 };
 
 const updatePlayStatisticsOnNav = async sessionKey => {
