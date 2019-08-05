@@ -10,6 +10,7 @@ import {
   addSongToSession,
   createNewSongbookSession,
   getAllActiveSongsForSession,
+  getAllSongbooks,
   getCurrentActiveSongForSession,
   getIndexOfCurrentSong,
   getSong,
@@ -327,9 +328,12 @@ app.get("/live/:sessionKey/setNoodleMode", async (req, res) => {
   res.json(`Set noodleMode to ${isNoodleMode}`);
 });
 
-app.listen(process.env["PORT"] || 3000, () =>
-  console.log(`Live Power Hour app listening on port ${process.env["PORT"]}!`),
-);
+app.get("/live/secretList", async (req, res) => {
+  const songbookList = await getAllSongbooks();
+  res.render("secretList.ejs", {
+    songbookList,
+  });
+});
 
 app.get("/help", async (req, res) => {
   res.send(`/live/{sessionKey}/setMaxSongs?maxSongs={numberOfSongs}<br>
@@ -368,3 +372,7 @@ async function getCurrentPlaylistSong(sessionKey, isNoodleMode = false) {
     total: totalActiveSongs,
   };
 }
+
+app.listen(process.env["PORT"] || 3000, () =>
+  console.log(`Live Power Hour app listening on port ${process.env["PORT"]}!`),
+);

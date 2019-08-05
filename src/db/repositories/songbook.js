@@ -219,6 +219,10 @@ export const getSongbookForSession = async sessionKey => {
     .first();
 };
 
+export const getAllSongbooks = async => {
+  return knex.from("songbook").orderBy("title");
+};
+
 const getNextActiveSongForSession = async sessionKey => {
   const currentSong = await getCurrentActiveSongForSession(sessionKey);
 
