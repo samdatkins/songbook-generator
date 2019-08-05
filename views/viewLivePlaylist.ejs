@@ -22,9 +22,11 @@
 <body>
   <section class="section">
     <div id="tabView" class="container">
-      <a href="" id="qrcodelink">
-        <div id="qrcode"></div>
-      </a>
+      <% if (noodleMode !== true) { %>
+        <a href="" id="qrcodelink">
+          <div id="qrcode" class="qrcode"></div>
+        </a>
+      <% } %>
       <div style="float:right;" id="timerCountdown"></div>
       <p class="title has-text-grey" id="songbookTitle">
         <%= powerHourTitle %>
@@ -37,6 +39,11 @@
       <h1 class="title" id="songTitle"></h1>
       <p class="subtitle" id="songUrl"></p>
       <pre id="songTab"></pre>
+      <% if (noodleMode === true) { %>
+        <a href="" id="qrcodelink">
+          <div id="qrcode"></div>
+        </a>
+      <% } %>
     </div>
   </section>
 </body>
