@@ -4,6 +4,7 @@ export async function sendEmail(
   text,
   html,
   attachment,
+  attachmentName,
 ) {
   const sgMail = require("@sendgrid/mail");
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -20,7 +21,7 @@ export async function sendEmail(
     (msg.attachments = [
       {
         content: attachment,
-        filename: "songbook.docx",
+        filename: (attachmentName || "songbook") + ".docx",
         type:
           "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         disposition: "attachment",

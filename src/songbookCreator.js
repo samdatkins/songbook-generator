@@ -25,10 +25,17 @@ export async function processSongbook(playlistFile, toEmailAddress) {
   generateSongbook(tabs, toEmailAddress);
 }
 
-export async function generateSongbook(tabs, toEmailAddress) {
+export async function generateSongbook(
+  tabs,
+  toEmailAddress,
+  shouldAddTOC = true,
+  songbookTitle = "songbook",
+) {
   const tabWriter = new TabWriter();
 
-  tabWriter.addTableOfContents(tabs.map(tab => tab.name));
+  if (shouldAddTOC) {
+    tabWriter.addTableOfContents(tabs.map(tab => tab.name));
+  }
 
   for (const tab of tabs) {
     tab.content.text = formatTab(tab.content.text, WEB_MAX_LINES_PER_SONG);
@@ -43,6 +50,7 @@ export async function generateSongbook(tabs, toEmailAddress) {
     "Attached is your songbook",
     null,
     tabAttachment,
+    songbookTitle,
   );
 }
 

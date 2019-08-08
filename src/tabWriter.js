@@ -89,7 +89,6 @@ export class TabWriter {
 
   // private method
   [_hasAnyOverflowingLines](tab) {
-    console.log(tab);
     const textLines = tab.content.text
       .replace(/\[ch\]/g, "")
       .replace(/\[\/ch\]/g, "")

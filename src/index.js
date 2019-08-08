@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import * as dotenv from "dotenv";
 import express from "express";
 import enforce from "express-sslify";
+import * as _ from "lodash";
 import path from "path";
 import { getMostPopularSongsForTimePeriod } from "./billboardTopHundredAggregator";
 import "./db/knexfile";
@@ -36,7 +37,6 @@ import {
 import { getSpotifyPlaylistTracks } from "./spotifyPlaylistReader";
 import * as ugs from "./tab-scraper";
 import { formatTab, getBestMatch, getTabForUrl } from "./tabSearcher";
-
 dotenv.config();
 
 const alphaRegex = /[^0-9A-Za-z\ ]+/g;
@@ -349,8 +349,19 @@ app.get("/live/secretList2", async (req, res) => {
 
 app.get("/live/massiveDump", async (req, res) => {
   const songs = await getAllSongs();
-  const tabs = songs.map(song => convertSongToTab(song));
-  generateSongbook(tabs, "sambowatkins@gmail.com");
+  const email = req.query.email;
+  const songChunks = _.chunk(songs, 100);
+  var index = 1;
+  for (const songChunk of songChunks) {
+    const tabs = songChunk.map(song => convertSongToTab(song));
+    await generateSongbook(
+      tabs,
+      email,
+      false, // don't add TOC
+      `songbook (${index++} of ${songChunks.length})`,
+    );
+  }
+
   res.json("done");
 });
 
