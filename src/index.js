@@ -11,6 +11,7 @@ import {
   createNewSongbookSession,
   getAllActiveSongsForSession,
   getAllSongbooks,
+  getAllSongs,
   getCurrentActiveSongForSession,
   getIndexOfCurrentSong,
   getSong,
@@ -27,7 +28,11 @@ import {
   setSongToSpecificIndexOfActiveSongsForSession,
   updateSong,
 } from "./db/repositories/songbook";
-import { processSongbook } from "./songbookCreator";
+import {
+  convertSongToTab,
+  generateSongbook,
+  processSongbook,
+} from "./songbookCreator";
 import { getSpotifyPlaylistTracks } from "./spotifyPlaylistReader";
 import * as ugs from "./tab-scraper";
 import { formatTab, getBestMatch, getTabForUrl } from "./tabSearcher";
@@ -333,6 +338,20 @@ app.get("/live/secretList", async (req, res) => {
   res.render("secretList.ejs", {
     songbookList,
   });
+});
+
+app.get("/live/secretList2", async (req, res) => {
+  const songs = await getAllSongs();
+  res.render("secretList2.ejs", {
+    songs,
+  });
+});
+
+app.get("/live/massiveDump", async (req, res) => {
+  const songs = await getAllSongs();
+  const tabs = songs.map(song => convertSongToTab(song));
+  generateSongbook(tabs, "sambowatkins@gmail.com");
+  res.json("done");
 });
 
 app.get("/help", async (req, res) => {

@@ -30,6 +30,6 @@ export async function sendEmail(
   try {
     await sgMail.send(msg);
   } catch (err) {
-    console.err(`failed to send email: ${err}`);
+    console.error(`failed to send email: ${err}`);
   }
 }

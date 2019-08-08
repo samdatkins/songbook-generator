@@ -1,30 +1,38 @@
 import * as fs from "fs";
 import { sendEmail } from "./emailClient";
-import { getBestMatch, getTabForUrl } from "./tabSearcher";
+import { formatTab, getBestMatch, getTabForUrl } from "./tabSearcher";
 import { TabWriter } from "./tabWriter";
 
 const WEB_MAX_LINES_PER_SONG = 116;
 
 export async function processSongbook(playlistFile, toEmailAddress) {
   const songArray = playlistFile.split("\n");
-  console.log(songArray);
 
   const { songOverrides } = JSON.parse(fs.readFileSync("songOverrides.json"));
 
-  const tabWriter = new TabWriter();
-
-  tabWriter.addTableOfContents(songArray);
-
-  console.log(songArray);
+  var tabs = [];
 
   for (const song of songArray) {
     const override = getSongOverrideIfAny(song, songOverrides);
     var tab;
     override
       ? (tab = await getTabForUrl(override.urlOverride))
-      : (tab = await getTabForSong(song, tabWriter));
+      : (tab = await getTabForSong(song));
 
-    tab && tabWriter.writeTabToDoc(formatTab(tab, WEB_MAX_LINES_PER_SONG));
+    tab && tabs.push(tab);
+  }
+
+  generateSongbook(tabs, toEmailAddress);
+}
+
+export async function generateSongbook(tabs, toEmailAddress) {
+  const tabWriter = new TabWriter();
+
+  tabWriter.addTableOfContents(tabs.map(tab => tab.name));
+
+  for (const tab of tabs) {
+    tab.content.text = formatTab(tab.content.text, WEB_MAX_LINES_PER_SONG);
+    tabWriter.writeTabToDoc(tab);
   }
 
   const tabAttachment = await tabWriter.getDocAsBase64String();
@@ -36,6 +44,17 @@ export async function processSongbook(playlistFile, toEmailAddress) {
     null,
     tabAttachment,
   );
+}
+
+export function convertSongToTab(song) {
+  return {
+    name: song.title,
+    artist: song.artist,
+    url: song.url,
+    content: {
+      text: song.content,
+    },
+  };
 }
 
 function getSongOverrideIfAny(song, songOverrides) {

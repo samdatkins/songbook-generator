@@ -50,7 +50,6 @@ export class TabWriter {
   }
 
   writeTabToDoc(tab) {
-    console.log(`Writing ${tab.name} - ${tab.artist} to doc`);
     doc.addParagraph(
       new Paragraph(`${tab.name} - ${tab.artist}`)
         .style("monospaced")
@@ -90,6 +89,7 @@ export class TabWriter {
 
   // private method
   [_hasAnyOverflowingLines](tab) {
+    console.log(tab);
     const textLines = tab.content.text
       .replace(/\[ch\]/g, "")
       .replace(/\[\/ch\]/g, "")
