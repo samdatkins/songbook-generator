@@ -220,7 +220,7 @@ export const getSongbookForSession = async sessionKey => {
 };
 
 export const getAllSongbooks = async => {
-  return knex.from("songbook").orderBy("title");
+  return knex.from("songbook").orderBy("created_at", "desc");
 };
 
 export const getAllSongs = async => {
