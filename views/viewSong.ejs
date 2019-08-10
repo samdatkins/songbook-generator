@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Live Playlist - All Power Hours</title>
+    <title>Song</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css"
@@ -13,22 +13,30 @@
       src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"
     ></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="/scripts/livePlaylistNav.js"></script>
     <script src="/scripts/jquery.qrcode.min.js"></script>
     <link rel="stylesheet" href="/style/livePlaylist.css" />
   </head>
 
   <body>
     <section class="section">
-      <ol>
-        <% for(var i=0; i < songs.length; i++) { %>
-        <li>
-          <a href="/songs/<%= encodeURIComponent(songs[i].url) %>/view">
-            <%= songs[i].artist %> - <%= songs[i].title %>
-          </a>
-        </li>
-        <% } %>
-      </ol>
+      <div id="tabView" class="container">
+        <h1 class="title" id="songTitle">
+          <%= song.title %> - <%= song.artist %>
+        </h1>
+        <p class="subtitle" id="songUrl">
+          <a href="<%= song.url %>"><%= song.url %></a>
+        </p>
+        <pre id="songTab">
+          <%- song
+            .content
+            .split("\n")
+            .join("\n")
+            .replace(/\r\n/g, "<br />")
+            .replace(/\n/g, "<br />")
+            .replace(/\[ch\]/g, "<span class='chord'>")
+            .replace(/\[\/ch\]/g, "</span>"); %>
+        </pre>
+      </div>
     </section>
   </body>
 </html>

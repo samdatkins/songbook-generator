@@ -110,6 +110,14 @@ app.get("/live/:sessionKey/view", async (req, res) => {
   });
 });
 
+app.get("/songs/:tabUrl/view", async (req, res) => {
+  const song = await getSong(req.params.tabUrl);
+
+  return res.render("viewSong.ejs", {
+    song: song,
+  });
+});
+
 app.get("/live/:sessionKey/add", async (req, res) => {
   if (!(await isValidSongbookSession(req.params.sessionKey))) {
     res.status(404);
