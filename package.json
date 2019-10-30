@@ -20,7 +20,7 @@
     "ejs": "^2.6.1",
     "express": "^4.16.4",
     "express-sslify": "^1.2.0",
-    "knex": "^0.16.5",
+    "knex": "^0.19.5",
     "lodash": "^4.17.11",
     "moment": "^2.23.0",
     "moment-range": "^4.0.1",
