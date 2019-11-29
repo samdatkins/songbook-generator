@@ -88,13 +88,13 @@ function validateType(type) {
   }
 }
 
-function extractContent(data) {
-  const type = data.data.tab.type_name;
+function extractContent(tabData) {
+  const type = tabData.tab.type_name;
   switch (type) {
     case tabTypes["Video"]:
-      let videoId = data.data.tab.marty_youtube_video_id;
+      let videoId = tabData.tab.marty_youtube_video_id;
       if (!videoId) {
-        videoId = data.data.tab_view.wiki_tab.content;
+        videoId = tabData.tab_view.wiki_tab.content;
       }
       return {
         url: `https://www.youtube.com/watch?v=${videoId}`,
@@ -105,11 +105,11 @@ function extractContent(data) {
     case tabTypes["Drums"]:
     case tabTypes["Ukulele"]:
       return {
-        text: data.data.tab_view.wiki_tab.content,
+        text: tabData.tab_view.wiki_tab.content,
       };
     case tabTypes["Power"]:
     case tabTypes["Guitar Pro"]:
-      const id = data.data.tab.id;
+      const id = tabData.tab.id;
       return {
         url: `${process.env["TABS_BASE_URL"]}/tab/download?id=${id}`,
       };
@@ -126,14 +126,14 @@ function extractContent(data) {
  */
 function parseListTABs(body) {
   const $ = cheerio.load(body);
-  const data = extractJavaScriptAssignation($, "window.UGAPP.store.page");
+  const data = JSON.parse($(".js-store")[0].attribs["data-content"]);
   if (!data) return [];
   let results = [];
-  if (typeof data.data.other_tabs !== "undefined") {
+  if (typeof data.store.page.data.other_tabs !== "undefined") {
     results = results.concat(data.data.other_tabs);
   }
-  if (typeof data.data.results !== "undefined") {
-    results = results.concat(data.data.results);
+  if (typeof data.store.page.data.results !== "undefined") {
+    results = results.concat(data.store.page.data.results);
   }
   return results.reduce((tabs, result) => {
     if (typeof result.marketing_type !== "undefined") return tabs;
@@ -157,41 +157,42 @@ function parseListTABs(body) {
 
 function parseSingleTAB(html, tabUrl) {
   const $ = cheerio.load(html);
-  const data = extractJavaScriptAssignation($, "window.UGAPP.store.page");
+  const data = JSON.parse($(".js-store")[0].attribs["data-content"]);
   if (!data) return;
+  const tabData = data.store.page.data;
   const tab = {};
   // Artist.
-  tab.artist = data.data.tab.artist_name;
+  tab.artist = tabData.tab.artist_name;
   // Name.
-  tab.name = data.data.tab.song_name;
+  tab.name = tabData.tab.song_name;
   // Url.
-  tab.url = data.data.tab.tab_url;
+  tab.url = tabData.tab.tab_url;
   // Rating and number rates.
-  tab.rating = data.data.tab.rating;
-  tab.numberRates = data.data.tab.votes;
+  tab.rating = tabData.tab.rating;
+  tab.numberRates = tabData.tab.votes;
   // Type.
-  tab.type = data.data.tab.type_name;
+  tab.type = tabData.tab.type_name;
   // Difficulty.
-  if (typeof data.data.tab_view.meta.difficulty === "string") {
-    tab.difficulty = data.data.tab_view.meta.difficulty;
+  if (typeof tabData.tab_view.meta.difficulty === "string") {
+    tab.difficulty = tabData.tab_view.meta.difficulty;
   }
   // Capo
-  if (data.data.tab_view.meta.capo !== undefined) {
-    tab.capo = data.data.tab_view.meta.capo;
+  if (tabData.tab_view.meta.capo !== undefined) {
+    tab.capo = tabData.tab_view.meta.capo;
   }
   // Key
-  if (data.data.tab_view.meta.tonality !== undefined) {
-    tab.tonality = data.data.tab_view.meta.tonality;
+  if (tabData.tab_view.meta.tonality !== undefined) {
+    tab.tonality = tabData.tab_view.meta.tonality;
   }
   // Tuning
   if (
-    data.data.tab_view.meta.tuning !== undefined &&
-    data.data.tab_view.meta.tuning.value !== undefined
+    tabData.tab_view.meta.tuning !== undefined &&
+    tabData.tab_view.meta.tuning.value !== undefined
   ) {
-    tab.tuning = data.data.tab_view.meta.tuning.value;
+    tab.tuning = tabData.tab_view.meta.tuning.value;
   }
   // Content.
-  tab.content = extractContent(data);
+  tab.content = extractContent(tabData);
 
   return tab;
 }
