@@ -44,7 +44,7 @@
       <% } %>
       <h1 class="title" id="songTitle"></h1>
       <p class="subtitle"><span id="songUrl"></span>
-      <% if (passengerMode === false) { %>
+      <% if (!passengerMode && !noodleMode { %>
           || <a href="view?passengerMode=true">[enable passenger mode]</a>
       <% } %>
       </p>
