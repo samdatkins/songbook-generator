@@ -9,7 +9,7 @@ const playlistTimer = new Interval(tick, 0.1, totalTimer, formatTimer);
 const maxSongPollingInterval = 2;
 var lastMaxSongUpdate = new Date();
 
-$(document).ready(function() {
+$(document).ready(function () {
   $("#qrcode").qrcode({
     width: 240,
     height: 240,
@@ -24,7 +24,7 @@ $(document).ready(function() {
   }
 
   takePlaylistAction("current", "GET");
-  $("body").keydown(function(e) {
+  $("body").keydown(function (e) {
     if (e.keyCode == 37) {
       // left
       takePlaylistAction("prev", "POST");
@@ -78,9 +78,7 @@ function tick() {
       .css("font-size", "50em");
     displayString = timeToDisplay;
   } else if (mode === "song") {
-    $("#timerCountdown")
-      .css("position", "static")
-      .css("font-size", "3.5em");
+    $("#timerCountdown").css("position", "static").css("font-size", "3.5em");
     displayString = timeToDisplay;
   } else {
     $("#timerCountdown")
@@ -103,9 +101,11 @@ function takePlaylistAction(action, verb, params = {}) {
     url: `/live/${sessionKey}/${action}`,
     data: params,
     type: verb,
-    success: function(result, textStatus, xhr) {
+    success: function (result, textStatus, xhr) {
       if (xhr.status === 204) {
-        $("#songTitle").html(`<a href="add" target="_blank">No songs! Add some by clicking the QR code -></a>`);
+        $("#songTitle").html(
+          `<a href="add" target="_blank">No songs! Add some by clicking the QR code -></a>`,
+        );
         $("#songTab").hide();
         return;
       }
@@ -118,19 +118,19 @@ function takePlaylistAction(action, verb, params = {}) {
         .replace(/\r\n/g, "<br />")
         .replace(/\n/g, "<br />")
         .replace(/\[ch\]/g, "<span class='chord'>")
-        .replace(/\[\/ch\]/g, "</span>");
+        .replace(/\[\/ch\]/g, "</span>")
+        .replace(/\[tab\]/g, "")
+        .replace(/\[\/tab\]/g, "");
 
       $("#songTitle").html(
-        `${title} (${result.current} of <span id='totalSongs'>${
-          result.total
-        }</span>)`,
+        `${title} (${result.current} of <span id='totalSongs'>${result.total}</span>)`,
       );
       $("#songUrl").html(`<a href="${result.tabUrl}">${result.tabUrl}</a>`);
       $("#songTab").html(`${tab}`);
 
       playlistTimer.start();
     },
-    error: function(xhr, textStatus) {
+    error: function (xhr, textStatus) {
       if (xhr.status === 404 && xhr.responseText === '"Invalid session key"') {
         $("#songTitle").html(
           `Invalid power hour session key, please create one <a href="/live">here</a>`,
@@ -157,7 +157,7 @@ function updateTotalSongs() {
   $.ajax({
     url: `/live/${sessionKey}/count`,
     type: "GET",
-    success: function(result) {
+    success: function (result) {
       $("#totalSongs").html(result.count);
     },
     timeout: 5000,

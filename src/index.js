@@ -103,10 +103,14 @@ app.get("/live/:sessionKey/view", async (req, res) => {
 
   setLastNavActionToNow(req.params.sessionKey);
 
+  const passengerMode =
+    (req.query.passengerMode || "").toLowerCase() === "true";
+
   return res.render("viewLivePlaylist.ejs", {
     sessionKey: songbook.session_key,
     powerHourTitle: songbook.title,
     noodleMode: songbook.is_noodle_mode,
+    passengerMode: passengerMode,
   });
 });
 
@@ -228,18 +232,14 @@ app.post("/live/:sessionKey/add", async (req, res) => {
   if (await isSongbookFull(req.params.sessionKey)) {
     res.status(400);
     return res.send(
-      `<p>Songbook full, no more requests allowed! </p><a href='/live/${
-        req.params.sessionKey
-      }/add><- Back</a>`,
+      `<p>Songbook full, no more requests allowed! </p><a href='/live/${req.params.sessionKey}/add><- Back</a>`,
     );
   }
 
   const match = await getBestMatch(req.body.song.replace(alphaRegex, ""));
   if (!match) {
     res.send(
-      `<p>No matches found :(</p><a href='/live/${
-        req.params.sessionKey
-      }/add><- Back</a>`,
+      `<p>No matches found :(</p><a href='/live/${req.params.sessionKey}/add><- Back</a>`,
     );
   }
   const tab = await getTabForUrl(match.url);
@@ -361,7 +361,7 @@ app.get("/live/massiveDump", async (req, res) => {
   const songChunks = _.chunk(songs, 100);
   var index = 1;
   for (const songChunk of songChunks) {
-    const tabs = songChunk.map(song => convertSongToTab(song));
+    const tabs = songChunk.map((song) => convertSongToTab(song));
     await generateSongbook(
       tabs,
       email,

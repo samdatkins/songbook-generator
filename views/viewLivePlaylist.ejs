@@ -8,13 +8,19 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css" />
   <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src="/scripts/livePlaylistNav.js"></script>
   <script src="/scripts/jquery.qrcode.min.js"></script>
   <link rel="stylesheet" href="/style/livePlaylist.css" />
   <% if (noodleMode === true) { %>
-  <script>
-    window.noodleMode = <%= noodleMode %>;
-  </script>
+    <script>
+      window.noodleMode = <%= noodleMode %>;
+    </script>
+    <script src="/scripts/livePlaylistNav.js"></script>
+  <% } else { %>
+    <% if (passengerMode === true) { %>
+      <script src="/scripts/livePlaylistView.js"></script>
+    <% } else { %>
+      <script src="/scripts/livePlaylistNav.js"></script>
+    <% } %>
   <% } %>
 
 </head>
@@ -37,7 +43,11 @@
           <BR>
       <% } %>
       <h1 class="title" id="songTitle"></h1>
-      <p class="subtitle" id="songUrl"></p>
+      <p class="subtitle"><span id="songUrl"></span>
+      <% if (passengerMode === false) { %>
+          || <a href="view?passengerMode=true">[enable passenger mode]</a>
+      <% } %>
+      </p>
       <pre id="songTab"></pre>
       <% if (noodleMode === true) { %>
         <a href="" id="qrcodelink">
