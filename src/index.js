@@ -372,7 +372,7 @@ app.get("/live/playlistToPdf", async (req, res) => {
   const songs = await getAllActiveSongsForSession(req.query.sessionKey);
 
   const email = req.query.email;
-  const tabs = songChunk.map((song) => convertSongToTab(song));
+  const tabs = songs.map((song) => convertSongToTab(song));
   await generateSongbook(
     tabs,
     email,
