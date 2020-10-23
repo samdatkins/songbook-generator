@@ -56,7 +56,7 @@ app.post("/submit-tab", (req, res) => {
 });
 
 app.get("/playlistGenerator", (req, res) =>
-  res.sendFile(path.join(__dirname, "../public", "/playlistGenerator.html")),
+  res.sendFile(path.join(__dirname, "../public", "/playlistGenerator.html"))
 );
 
 app.get("/billboardTopPlaylist", async (req, res) => {
@@ -64,20 +64,20 @@ app.get("/billboardTopPlaylist", async (req, res) => {
     req.query.startYear,
     req.query.endYear,
     req.query.count,
-    req.query.email,
+    req.query.email
   );
 
   res.send("Queued job");
 });
 
 app.get("/spotifyPlaylist", async (req, res) =>
-  res.send(await getSpotifyPlaylistTracks(req.query.playlist_id)),
+  res.send(await getSpotifyPlaylistTracks(req.query.playlist_id))
 );
 
 // Live playlist code below (break out in to own file later)
 app.get("/", (req, res) => res.redirect(`/live`));
 app.get("/live", (req, res) =>
-  res.sendFile(path.join(__dirname, "../public", "/liveLanding.html")),
+  res.sendFile(path.join(__dirname, "../public", "/liveLanding.html"))
 );
 
 app.get("/live/tab-autocomplete", async (req, res) => {
@@ -146,7 +146,7 @@ app.get("/live/:sessionKey/current", async (req, res) => {
 
   const curSong = await getCurrentPlaylistSong(
     req.params.sessionKey,
-    songbook.is_noodle_mode,
+    songbook.is_noodle_mode
   );
   if (!curSong) res.status(204);
   return res.json(curSong);
@@ -155,7 +155,7 @@ app.get("/live/:sessionKey/current", async (req, res) => {
 app.get("/live/:sessionKey/count", async (req, res) =>
   res.json({
     count: await getTotalNumberOfActiveSongsForSession(req.params.sessionKey),
-  }),
+  })
 );
 
 app.get("/live/view", async (req, res) => {
@@ -163,7 +163,7 @@ app.get("/live/view", async (req, res) => {
 });
 
 app.get("/live/create", (req, res) =>
-  res.sendFile(path.join(__dirname, "../public", "/createSongbook.html")),
+  res.sendFile(path.join(__dirname, "../public", "/createSongbook.html"))
 );
 
 app.post("/live/create", async (req, res) => {
@@ -171,7 +171,7 @@ app.post("/live/create", async (req, res) => {
   if (!req.body.sessionKey.match(alphaNumericAndDashesRegex)) {
     res.status(400);
     res.json(
-      "Illegal name! You may only use letters, numbers, and dashes (no spaces!)",
+      "Illegal name! You may only use letters, numbers, and dashes (no spaces!)"
     );
   }
 
@@ -184,7 +184,7 @@ app.post("/live/create", async (req, res) => {
     req.body.sessionKey,
     req.body.title,
     req.body.maxSongLimit || null,
-    req.body.isNoodleMode === "on",
+    req.body.isNoodleMode === "on"
   );
   res.redirect(`/live/${req.body.sessionKey}/view`);
 });
@@ -204,10 +204,7 @@ app.post("/live/:sessionKey/next", async (req, res) => {
   const songbook = await getSongbookForSession(req.params.sessionKey);
 
   res.json(
-    await getCurrentPlaylistSong(
-      req.params.sessionKey,
-      songbook.is_noodle_mode,
-    ),
+    await getCurrentPlaylistSong(req.params.sessionKey, songbook.is_noodle_mode)
   );
 });
 
@@ -216,10 +213,7 @@ app.post("/live/:sessionKey/prev", async (req, res) => {
   const songbook = await getSongbookForSession(req.params.sessionKey);
 
   res.json(
-    await getCurrentPlaylistSong(
-      req.params.sessionKey,
-      songbook.is_noodle_mode,
-    ),
+    await getCurrentPlaylistSong(req.params.sessionKey, songbook.is_noodle_mode)
   );
 });
 
@@ -232,14 +226,14 @@ app.post("/live/:sessionKey/add", async (req, res) => {
   if (await isSongbookFull(req.params.sessionKey)) {
     res.status(400);
     return res.send(
-      `<p>Songbook full, no more requests allowed! </p><a href='/live/${req.params.sessionKey}/add><- Back</a>`,
+      `<p>Songbook full, no more requests allowed! </p><a href='/live/${req.params.sessionKey}/add><- Back</a>`
     );
   }
 
   const match = await getBestMatch(req.body.song.replace(alphaRegex, ""));
   if (!match) {
     res.send(
-      `<p>No matches found :(</p><a href='/live/${req.params.sessionKey}/add><- Back</a>`,
+      `<p>No matches found :(</p><a href='/live/${req.params.sessionKey}/add><- Back</a>`
     );
   }
   const tab = await getTabForUrl(match.url);
@@ -290,7 +284,7 @@ app.post("/live/:sessionKey/remove", async (req, res) => {
 
   const curSong = await getCurrentPlaylistSong(
     req.params.sessionKey,
-    songbook.is_noodle_mode,
+    songbook.is_noodle_mode
   );
   if (!curSong) res.status(204);
   return res.json(curSong);
@@ -314,15 +308,15 @@ app.get("/live/:sessionKey/index", async (req, res) => {
         " - " +
         `<a href="/live/songs/${encodeURIComponent(song.url)}/edit">edit</a>` +
         "<br />",
-      "",
-    ),
+      ""
+    )
   );
 });
 
 app.get("/live/:sessionKey/setCurrent", async (req, res) => {
   setSongToSpecificIndexOfActiveSongsForSession(
     req.params.sessionKey,
-    req.query.cur,
+    req.query.cur
   );
   res.redirect(`/live/${req.params.sessionKey}/view`);
 });
@@ -330,7 +324,7 @@ app.get("/live/:sessionKey/setCurrent", async (req, res) => {
 app.get("/live/:sessionKey/setMaxSongs", async (req, res) => {
   await setMaxSongsForSession(
     req.params.sessionKey,
-    parseInt(req.query.maxSongs),
+    parseInt(req.query.maxSongs)
   );
   res.json(`Set max songs to ${req.query.maxSongs}`);
 });
@@ -366,9 +360,25 @@ app.get("/live/massiveDump", async (req, res) => {
       tabs,
       email,
       false, // don't add TOC
-      `songbook (${index++} of ${songChunks.length})`,
+      `songbook (${index++} of ${songChunks.length})`
     );
   }
+
+  res.json("done");
+});
+
+app.get("/live/playlistToPdf", async (req, res) => {
+  const songbook = await getSongbookForSession(req.query.sessionKey);
+  const songs = await getAllActiveSongsForSession(req.query.sessionKey);
+
+  const email = req.query.email;
+  const tabs = songChunk.map((song) => convertSongToTab(song));
+  await generateSongbook(
+    tabs,
+    email,
+    true, // do add TOC
+    songbook.title
+  );
 
   res.json("done");
 });
@@ -393,12 +403,12 @@ async function getCurrentPlaylistSong(sessionKey, isNoodleMode = false) {
   }
 
   const totalActiveSongs = await getTotalNumberOfActiveSongsForSession(
-    sessionKey,
+    sessionKey
   );
 
   const tab = formatTab(
     song.content,
-    isNoodleMode ? 9999 : WEB_MAX_LINES_PER_SONG,
+    isNoodleMode ? 9999 : WEB_MAX_LINES_PER_SONG
   );
 
   return {
@@ -412,5 +422,5 @@ async function getCurrentPlaylistSong(sessionKey, isNoodleMode = false) {
 }
 
 app.listen(process.env["PORT"] || 3000, () =>
-  console.log(`Live Power Hour app listening on port ${process.env["PORT"]}!`),
+  console.log(`Live Power Hour app listening on port ${process.env["PORT"]}!`)
 );
