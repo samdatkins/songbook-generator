@@ -383,6 +383,24 @@ app.get("/live/playlistToPdf", async (req, res) => {
   res.json("done");
 });
 
+app.get("/live/allPlaylistsToPdf", async (req, res) => {
+  const songbooks = await getAllSongbooks();
+  const email = req.query.email;
+
+  for (const songbook of songbooks) {
+    const songs = await getAllActiveSongsForSession(songbook.session_key);
+    const tabs = songs.map((song) => convertSongToTab(song));
+    await generateSongbook(
+      tabs,
+      email,
+      true, // do add TOC
+      songbook.title
+    );
+  }
+
+  res.json("done");
+});
+
 app.get("/help", async (req, res) => {
   res.send(`/live/{sessionKey}/setMaxSongs?maxSongs={numberOfSongs}<br>
   /live/{sessionKey}/setNoodleMode?noodleMode={true/false}<br>
