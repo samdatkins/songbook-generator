@@ -14,6 +14,7 @@ export const development = {
   migrations: {
     directory: __dirname + "/migrations",
   },
+  ssl: { rejectUnauthorized: false },
 };
 
 export const production = {
@@ -22,6 +23,7 @@ export const production = {
   migrations: {
     directory: __dirname + "/migrations",
   },
+  ssl: { rejectUnauthorized: false },
 };
 
 const env = process.env["NODE_ENV"] || "development";
