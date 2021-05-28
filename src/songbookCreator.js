@@ -29,16 +29,16 @@ export async function generateSongbook(
   tabs,
   toEmailAddress,
   shouldAddTOC = true,
-  songbookTitle = "songbook",
+  songbookTitle = "songbook"
 ) {
   const tabWriter = new TabWriter();
 
   if (shouldAddTOC) {
-    tabWriter.addTableOfContents(tabs.map(tab => tab.name));
+    tabWriter.addTableOfContents(tabs.map((tab) => tab.name));
   }
 
   for (const tab of tabs) {
-    tab.content.text = formatTab(tab.content.text, WEB_MAX_LINES_PER_SONG);
+    tab.content.text = formatTab(tab.content.text, 99999999);
     tabWriter.writeTabToDoc(tab);
   }
 
@@ -50,7 +50,7 @@ export async function generateSongbook(
     "Attached is your songbook",
     null,
     tabAttachment,
-    songbookTitle,
+    songbookTitle
   );
 }
 
@@ -66,8 +66,8 @@ export function convertSongToTab(song) {
 }
 
 function getSongOverrideIfAny(song, songOverrides) {
-  const override = songOverrides.find(songOverride =>
-    trimAndCompareStringsInsensitive(songOverride.song, song),
+  const override = songOverrides.find((songOverride) =>
+    trimAndCompareStringsInsensitive(songOverride.song, song)
   );
 
   return override;
