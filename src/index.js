@@ -5,7 +5,6 @@ import express from "express";
 import enforce from "express-sslify";
 import * as _ from "lodash";
 import path from "path";
-import { getMostPopularSongsForTimePeriod } from "./billboardTopHundredAggregator";
 import "./db/knexfile";
 import {
   addSongToSession,
@@ -58,17 +57,6 @@ app.post("/submit-tab", (req, res) => {
 app.get("/playlistGenerator", (req, res) =>
   res.sendFile(path.join(__dirname, "../public", "/playlistGenerator.html"))
 );
-
-app.get("/billboardTopPlaylist", async (req, res) => {
-  getMostPopularSongsForTimePeriod(
-    req.query.startYear,
-    req.query.endYear,
-    req.query.count,
-    req.query.email
-  );
-
-  res.send("Queued job");
-});
 
 app.get("/spotifyPlaylist", async (req, res) =>
   res.send(await getSpotifyPlaylistTracks(req.query.playlist_id))
@@ -408,7 +396,6 @@ app.get("/help", async (req, res) => {
   /live/{sessionKey}/remove?url={url pasted directly from the view page}<br><br>
   Old stuff:<br>
   /playlistGenerator<br>
-  /billboardTopPlaylist?startYear={1990}&endYear={2000}&count={60}&email={you@gmail.com}<br>
   /spotifyPlaylist<br>`);
 });
 
