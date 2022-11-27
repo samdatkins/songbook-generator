@@ -34,6 +34,7 @@
   "resolutions": {
     "lodash": "4.17.x",
     "set-value": "2.0.x",
-    "mixin-deep": "1.3.x"
+    "mixin-deep": "1.3.x",
+    "ejs/jake/minimatch": "3.0.x"
   }
 }
