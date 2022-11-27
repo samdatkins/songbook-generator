@@ -1,4 +1,3 @@
-import "@babel/polyfill";
 import bodyParser from "body-parser";
 import * as dotenv from "dotenv";
 import express from "express";
@@ -28,11 +27,6 @@ import {
   setSongToSpecificIndexOfActiveSongsForSession,
   updateSong,
 } from "./db/repositories/songbook";
-import {
-  convertSongToTab,
-  generateSongbook,
-  processSongbook,
-} from "./songbookCreator";
 import { getSpotifyPlaylistTracks } from "./spotifyPlaylistReader";
 import * as ugs from "./tab-scraper";
 import { formatTab, getBestMatch, getTabForUrl } from "./tabSearcher";
@@ -48,11 +42,6 @@ app.set("views", path.join(__dirname, "../views")); // set express to look in th
 app.set("view engine", "ejs"); // configure template engine
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static("public"));
-
-app.post("/submit-tab", (req, res) => {
-  processSongbook(req.body.playlist, req.body.email);
-  res.sendFile(path.join(__dirname, "../public", "/songbookProcessing.html"));
-});
 
 app.get("/playlistGenerator", (req, res) =>
   res.sendFile(path.join(__dirname, "../public", "/playlistGenerator.html"))
@@ -224,7 +213,7 @@ app.post("/live/:sessionKey/add", async (req, res) => {
       `<p>No matches found :(</p><a href='/live/${req.params.sessionKey}/add><- Back</a>`
     );
   }
-  const tab = await getTabForUrl(match.url);
+  const tab = (await getTabForUrl(match.url)) as any;
   const newSong = {
     artist: tab.artist,
     title: tab.name,
@@ -337,57 +326,39 @@ app.get("/live/secretList2", async (req, res) => {
   });
 });
 
-app.get("/live/massiveDump", async (req, res) => {
-  const songs = await getAllSongs();
-  const email = req.query.email;
-  const songChunks = _.chunk(songs, 100);
-  var index = 1;
-  for (const songChunk of songChunks) {
-    const tabs = songChunk.map((song) => convertSongToTab(song));
-    await generateSongbook(
-      tabs,
-      email,
-      false, // don't add TOC
-      `songbook (${index++} of ${songChunks.length})`
-    );
-  }
+// app.get("/live/playlistToPdf", async (req, res) => {
+//   const songbook = await getSongbookForSession(req.query.sessionKey);
+//   const songs = await getAllActiveSongsForSession(req.query.sessionKey);
 
-  res.json("done");
-});
+//   const email = req.query.email;
+//   const tabs = songs.map((song) => convertSongToTab(song));
+//   await generateSongbook(
+//     tabs,
+//     email,
+//     true, // do add TOC
+//     songbook.title
+//   );
 
-app.get("/live/playlistToPdf", async (req, res) => {
-  const songbook = await getSongbookForSession(req.query.sessionKey);
-  const songs = await getAllActiveSongsForSession(req.query.sessionKey);
+//   res.json("done");
+// });
 
-  const email = req.query.email;
-  const tabs = songs.map((song) => convertSongToTab(song));
-  await generateSongbook(
-    tabs,
-    email,
-    true, // do add TOC
-    songbook.title
-  );
+// app.get("/live/allPlaylistsToPdf", async (req, res) => {
+//   const songbooks = await getAllSongbooks();
+//   const email = req.query.email;
 
-  res.json("done");
-});
+//   for (const songbook of songbooks) {
+//     const songs = await getAllActiveSongsForSession(songbook.session_key);
+//     const tabs = songs.map((song) => convertSongToTab(song));
+//     await generateSongbook(
+//       tabs,
+//       email,
+//       true, // do add TOC
+//       songbook.title
+//     );
+//   }
 
-app.get("/live/allPlaylistsToPdf", async (req, res) => {
-  const songbooks = await getAllSongbooks();
-  const email = req.query.email;
-
-  for (const songbook of songbooks) {
-    const songs = await getAllActiveSongsForSession(songbook.session_key);
-    const tabs = songs.map((song) => convertSongToTab(song));
-    await generateSongbook(
-      tabs,
-      email,
-      true, // do add TOC
-      songbook.title
-    );
-  }
-
-  res.json("done");
-});
+//   res.json("done");
+// });
 
 app.get("/help", async (req, res) => {
   res.send(`/live/{sessionKey}/setMaxSongs?maxSongs={numberOfSongs}<br>

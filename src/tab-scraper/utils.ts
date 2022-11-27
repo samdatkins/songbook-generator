@@ -6,12 +6,8 @@ const debug = true;
 function extractJavaScriptAssignation($, assignTo) {
   let script = $("script")
     .toArray()
-    .find(script => {
-      return (
-        $(script)
-          .html()
-          .indexOf(assignTo) !== -1
-      );
+    .find((script) => {
+      return $(script).html().indexOf(assignTo) !== -1;
     });
   if (!script) return;
   const content = $(script).html();
@@ -62,7 +58,7 @@ function underscore(string) {
   let underscored = string[0].toLowerCase();
   return (
     underscored +
-    string.slice(1, string.length).replace(/([A-Z])/g, match => {
+    string.slice(1, string.length).replace(/([A-Z])/g, (match) => {
       return "_" + match.toLowerCase();
     })
   );
@@ -83,7 +79,7 @@ function validateType(type) {
         type +
         "'. Accepted type are: '" +
         Object.keys(tabTypeValues).join("', '") +
-        "'",
+        "'"
     );
   }
 }
@@ -135,9 +131,9 @@ function parseListTABs(body) {
   if (typeof data.store.page.data.results !== "undefined") {
     results = results.concat(data.store.page.data.results);
   }
-  return results.reduce((tabs, result) => {
+  return (results as any).reduce((tabs, result) => {
     if (typeof result.marketing_type !== "undefined") return tabs;
-    const tab = {};
+    const tab = {} as any;
     // Artist.
     tab.artist = result.artist_name;
     // Name.
@@ -160,7 +156,7 @@ function parseSingleTAB(html, tabUrl) {
   const data = JSON.parse($(".js-store")[0].attribs["data-content"]);
   if (!data) return;
   const tabData = data.store.page.data;
-  const tab = {};
+  const tab = {} as any;
   // Artist.
   tab.artist = tabData.tab.artist_name;
   // Name.
@@ -204,7 +200,7 @@ function parseSingleTAB(html, tabUrl) {
  * @return {Object} formatted query params
  */
 function formatSearchQuery(query) {
-  let params = {};
+  let params = {} as any;
   let acceptedParams = ["query", "type", "page"];
   let requiredParams = ["query"];
   let defaults = {
@@ -223,7 +219,7 @@ function formatSearchQuery(query) {
           underscored +
           "'. Accepted params are: '" +
           acceptedParams.join("', '") +
-          "'.",
+          "'."
       );
     }
   }
@@ -263,7 +259,7 @@ function formatSearchQuery(query) {
 
 function encodeParam(key, value) {
   if (Array.isArray(value)) {
-    return value.map(item => encodeParam(`${key}[]`, item)).join("&");
+    return value.map((item) => encodeParam(`${key}[]`, item)).join("&");
   } else {
     return key + "=" + encodeURIComponent(value);
   }
@@ -278,7 +274,7 @@ function encodeParam(key, value) {
 function encodeParams(params) {
   // encode everything
   return Object.keys(params)
-    .map(key => {
+    .map((key) => {
       return encodeParam(key, params[key]);
     })
     .join("&")

@@ -4,7 +4,7 @@ export async function sendEmail(
   text,
   html,
   attachment,
-  attachmentName,
+  attachmentName
 ) {
   const sgMail = require("@sendgrid/mail");
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -14,16 +14,15 @@ export async function sendEmail(
     subject: subject,
   };
 
-  html && (msg.html = html);
-  text && (msg.text = text);
+  html && (msg["html"] = html);
+  text && (msg["text"] = text);
   console.log(msg);
   attachment &&
-    (msg.attachments = [
+    (msg["attachments"] = [
       {
         content: attachment,
         filename: (attachmentName || "songbook") + ".docx",
-        type:
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         disposition: "attachment",
         contentId: "mytext",
       },
