@@ -6,7 +6,7 @@ export const createNewSongbookSession = async (
   sessionKey,
   title,
   maxSongLimit,
-  isNoodleMode,
+  isNoodleMode
 ) => {
   return knex("songbook").insert({
     id: uuid(),
@@ -19,17 +19,12 @@ export const createNewSongbookSession = async (
   });
 };
 
-export const getSong = async url => {
-  return await knex
-    .from("song")
-    .where("url", url)
-    .first();
+export const getSong = async (url) => {
+  return await knex.from("song").where("url", url).first();
 };
 
 export const updateSong = async (url, content) => {
-  await knex("song")
-    .update({ content })
-    .where({ url });
+  await knex("song").update({ content }).where({ url });
 };
 
 export const addSongToSession = async (newSong, sessionKey) => {
@@ -63,17 +58,19 @@ export const safeDeleteSongFromSession = async (url, sessionKey) => {
     .update("removed_at", new Date());
 };
 
-export const getTotalNumberOfActiveSongsForSession = async sessionKey => {
-  return (await knex
-    .from("songbook")
-    .innerJoin("song_entry", "song_entry.songbook_id", "songbook.id")
-    .whereNull("song_entry.removed_at")
-    .andWhere("session_key", sessionKey)
-    .count()
-    .first()).count;
+export const getTotalNumberOfActiveSongsForSession = async (sessionKey) => {
+  return (
+    await knex
+      .from("songbook")
+      .innerJoin("song_entry", "song_entry.songbook_id", "songbook.id")
+      .whereNull("song_entry.removed_at")
+      .andWhere("session_key", sessionKey)
+      .count()
+      .first()
+  ).count;
 };
 
-export const getAllActiveSongsForSession = async sessionKey => {
+export const getAllActiveSongsForSession = async (sessionKey) => {
   return knex
     .from("songbook")
     .innerJoin("song_entry", "song_entry.songbook_id", "songbook.id")
@@ -83,26 +80,28 @@ export const getAllActiveSongsForSession = async sessionKey => {
     .orderBy("song_entry.created_at");
 };
 
-export const getIndexOfCurrentSong = async sessionKey => {
+export const getIndexOfCurrentSong = async (sessionKey) => {
   return (await getNumberOfSongsBeforeCurrentSong(sessionKey)) + 1;
 };
 
-export const getNumberOfSongsBeforeCurrentSong = async sessionKey => {
+export const getNumberOfSongsBeforeCurrentSong = async (sessionKey) => {
   const currentSong = await getCurrentActiveSongForSession(sessionKey);
 
   return parseInt(
-    (await knex
-      .from("songbook")
-      .innerJoin("song_entry", "song_entry.songbook_id", "songbook.id")
-      .whereNull("song_entry.removed_at")
-      .andWhere("session_key", sessionKey)
-      .andWhere("song_entry.created_at", "<", currentSong.created_at)
-      .count()
-      .first()).count,
+    (
+      await knex
+        .from("songbook")
+        .innerJoin("song_entry", "song_entry.songbook_id", "songbook.id")
+        .whereNull("song_entry.removed_at")
+        .andWhere("session_key", sessionKey)
+        .andWhere("song_entry.created_at", "<", currentSong.created_at)
+        .count()
+        .first()
+    ).count
   );
 };
 
-export const isValidSongbookSession = async sessionKey => {
+export const isValidSongbookSession = async (sessionKey) => {
   return !!(await knex
     .select("current_song_timestamp")
     .from("songbook")
@@ -110,7 +109,7 @@ export const isValidSongbookSession = async sessionKey => {
     .first());
 };
 
-export const isSongbookFull = async sessionKey => {
+export const isSongbookFull = async (sessionKey) => {
   const { max_active_songs } = await knex
     .select("max_active_songs")
     .from("songbook")
@@ -134,9 +133,9 @@ export const setNoodleModeForSession = async (sessionKey, isNoodleMode) => {
     .update("is_noodle_mode", isNoodleMode);
 };
 
-export const getCurrentActiveSongForSession = async sessionKey => {
+export const getCurrentActiveSongForSession = async (sessionKey) => {
   const current_song_timestamp = await getCurrentSongBookmarkForSession(
-    sessionKey,
+    sessionKey
   );
 
   // get next song in playlist
@@ -163,15 +162,13 @@ export const getCurrentActiveSongForSession = async sessionKey => {
     .first();
 };
 
-export const setLastNavActionToNow = async sessionKey => {
-  return knex("songbook")
-    .where("session_key", sessionKey)
-    .update({
-      last_nav_action_taken_at: new Date(),
-    });
+export const setLastNavActionToNow = async (sessionKey) => {
+  return knex("songbook").where("session_key", sessionKey).update({
+    last_nav_action_taken_at: new Date(),
+  });
 };
 
-export const setSongToNextActiveSongForSession = async sessionKey => {
+export const setSongToNextActiveSongForSession = async (sessionKey) => {
   updatePlayStatisticsOnNav(sessionKey);
 
   const nextSong = await getNextActiveSongForSession(sessionKey);
@@ -183,16 +180,18 @@ export const setSongToNextActiveSongForSession = async sessionKey => {
 
 export const setSongToSpecificIndexOfActiveSongsForSession = async (
   sessionKey,
-  index,
+  index
 ) => {
   updatePlayStatisticsOnNav(sessionKey);
 
-  const specificSong = (await knex
-    .from("songbook")
-    .innerJoin("song_entry", "song_entry.songbook_id", "songbook.id")
-    .whereNull("song_entry.removed_at")
-    .andWhere("session_key", sessionKey)
-    .orderBy("song_entry.created_at"))[index];
+  const specificSong = (
+    await knex
+      .from("songbook")
+      .innerJoin("song_entry", "song_entry.songbook_id", "songbook.id")
+      .whereNull("song_entry.removed_at")
+      .andWhere("session_key", sessionKey)
+      .orderBy("song_entry.created_at")
+  )[index];
 
   await knex("songbook")
     .where("session_key", sessionKey)
@@ -200,7 +199,7 @@ export const setSongToSpecificIndexOfActiveSongsForSession = async (
   return specificSong;
 };
 
-export const setSongToPrevActiveSongForSession = async sessionKey => {
+export const setSongToPrevActiveSongForSession = async (sessionKey) => {
   updatePlayStatisticsOnNav(sessionKey);
 
   const prevSong = await getPrevActiveSongForSession(sessionKey);
@@ -212,22 +211,19 @@ export const setSongToPrevActiveSongForSession = async sessionKey => {
   return prevSong;
 };
 
-export const getSongbookForSession = async sessionKey => {
-  return knex
-    .from("songbook")
-    .where("session_key", sessionKey)
-    .first();
+export const getSongbookForSession = async (sessionKey) => {
+  return knex.from("songbook").where("session_key", sessionKey).first();
 };
 
-export const getAllSongbooks = async => {
+export const getAllSongbooks = async () => {
   return knex.from("songbook").orderBy("created_at", "desc");
 };
 
-export const getAllSongs = async => {
+export const getAllSongs = async () => {
   return knex.from("song").orderBy("artist");
 };
 
-const getNextActiveSongForSession = async sessionKey => {
+const getNextActiveSongForSession = async (sessionKey) => {
   const currentSong = await getCurrentActiveSongForSession(sessionKey);
 
   const nextSong = await knex
@@ -245,7 +241,7 @@ const getNextActiveSongForSession = async sessionKey => {
   return getCurrentActiveSongForSession(sessionKey);
 };
 
-const getPrevActiveSongForSession = async sessionKey => {
+const getPrevActiveSongForSession = async (sessionKey) => {
   const currentSong = await getCurrentActiveSongForSession(sessionKey);
 
   const prevSong = await knex
@@ -263,7 +259,7 @@ const getPrevActiveSongForSession = async sessionKey => {
   return getCurrentActiveSongForSession(sessionKey);
 };
 
-const getCurrentSongBookmarkForSession = async sessionKey => {
+const getCurrentSongBookmarkForSession = async (sessionKey) => {
   try {
     const { current_song_timestamp } = await knex
       .select("current_song_timestamp")
@@ -278,7 +274,7 @@ const getCurrentSongBookmarkForSession = async sessionKey => {
   }
 };
 
-const getSongbookIdForSession = async sessionKey => {
+const getSongbookIdForSession = async (sessionKey) => {
   const { id } = await knex
     .select("id")
     .from("songbook")
@@ -301,7 +297,7 @@ const isSongAlreadyInSongbook = async (song, songbookId) => {
   return matches && parseInt(matches.count) > 0;
 };
 
-const addSongToDb = async song => {
+const addSongToDb = async (song) => {
   const addedSong = await knex("song")
     .insert({
       ...song,
@@ -312,26 +308,22 @@ const addSongToDb = async song => {
   return addedSong[0];
 };
 
-const updatePlayStatisticsOnNav = async sessionKey => {
+const updatePlayStatisticsOnNav = async (sessionKey) => {
   const songbook = await getSongbookForSession(sessionKey);
   const currentSong = await getCurrentActiveSongForSession(sessionKey);
 
   const elapsedTimeMS = Math.abs(
-    differenceInMilliseconds(songbook.last_nav_action_taken_at, new Date()),
+    differenceInMilliseconds(songbook.last_nav_action_taken_at, new Date())
   );
 
   const play_time = (currentSong.play_time || 0.0) + elapsedTimeMS / 1000.0;
   const last_nav_action_taken_at = new Date();
 
-  await knex("songbook")
-    .where("id", songbook.id)
-    .update({
-      last_nav_action_taken_at,
-    });
+  await knex("songbook").where("id", songbook.id).update({
+    last_nav_action_taken_at,
+  });
 
-  await knex("song_entry")
-    .where("id", currentSong.id)
-    .update({
-      play_time,
-    });
+  await knex("song_entry").where("id", currentSong.id).update({
+    play_time,
+  });
 };

@@ -1,8 +1,5 @@
 import * as dotenv from "dotenv";
 import * as pg from "pg";
-require("@babel/register");
-require("@babel/polyfill");
-require("@babel/plugin-transform-async-to-generator");
 
 dotenv.config();
 if (!process.env["DATABASE_URL_DEVELOPMENT"] && !process.env["DATABASE_URL"]) {

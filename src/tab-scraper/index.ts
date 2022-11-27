@@ -1,10 +1,9 @@
 const request = require("request");
 const utils = require("./utils");
 
-function search(query, callback, requestOptions) {
-  requestOptions = requestOptions || {};
+export function search(query, callback, requestOptions = {}) {
   query = utils.formatSearchQuery(query);
-  requestOptions.url =
+  requestOptions["url"] =
     process.env["TABS_BASE_URL"] + "/search.php?" + utils.encodeParams(query);
   request(requestOptions, (error, response, body) => {
     if (error) {
@@ -18,13 +17,12 @@ function search(query, callback, requestOptions) {
   });
 }
 
-function autocomplete(query, callback, requestOptions) {
-  requestOptions = requestOptions || {};
+export function autocomplete(query, callback, requestOptions = {}) {
   query = query.toLowerCase();
   const letter = query[0];
   // The tab site's autocomplete only supports a maximum of 5 characters, and underscores are recognized as spaces.
   query = query.slice(0, 5).replace(" ", "_");
-  requestOptions.url =
+  requestOptions["url"] =
     process.env["TABS_BASE_URL"] +
     "/static/article/suggestions/" +
     letter +
@@ -51,9 +49,8 @@ function autocomplete(query, callback, requestOptions) {
   });
 }
 
-function get(tabUrl, callback, requestOptions) {
-  requestOptions = requestOptions || {};
-  requestOptions.url = tabUrl;
+export function get(tabUrl, callback, requestOptions = {}) {
+  requestOptions["url"] = tabUrl;
   request(requestOptions, (error, response, body) => {
     if (error) {
       callback(error, null, response, body);
@@ -69,9 +66,3 @@ function get(tabUrl, callback, requestOptions) {
     }
   });
 }
-
-module.exports = {
-  search,
-  autocomplete,
-  get,
-};
