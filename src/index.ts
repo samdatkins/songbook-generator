@@ -360,6 +360,11 @@ app.get("/live/secretList2", async (req, res) => {
 //   res.json("done");
 // });
 
+app.use(express.static(path.resolve(__dirname, "../frontend/build")));
+app.get("/react", async (req, res) => {
+  res.sendFile(path.resolve(__dirname, "../frontend/build", "index.html"));
+});
+
 app.get("/help", async (req, res) => {
   res.send(`/live/{sessionKey}/setMaxSongs?maxSongs={numberOfSongs}<br>
   /live/{sessionKey}/setNoodleMode?noodleMode={true/false}<br>
@@ -397,6 +402,6 @@ async function getCurrentPlaylistSong(sessionKey, isNoodleMode = false) {
   };
 }
 
-app.listen(process.env["PORT"] || 3000, () =>
+app.listen(process.env["PORT"] || 3001, () =>
   console.log(`Live Power Hour app listening on port ${process.env["PORT"]}!`)
 );

@@ -27,8 +27,10 @@
     "uuid": "^9.0.0"
   },
   "scripts": {
-    "start": "nodemon src/index.ts",
-    "build": "tsc",
+    "start": "nodemon --ignore ./frontend/ src/index.ts",
+    "build": "yarn run build-backend && yarn run build-frontend ",
+    "build-backend": "tsc",
+    "build-frontend": "cd frontend && yarn install && yarn run build",
     "production": "yarn run build && node dist/index.js"
   },
   "resolutions": {
