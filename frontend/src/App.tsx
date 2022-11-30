@@ -1,24 +1,7 @@
-import "./App.css";
-import axios from "axios";
-import { useEffect, useState } from "react";
+import CurrentSongView from "./components/CurrentSongView";
 
 function App() {
-  const [helpData, setHelpData] = useState("");
-  useEffect(() => {
-    async function getHelpData() {
-      const help = await axios.get("/help");
-      setHelpData(help.data);
-    }
-
-    getHelpData();
-  }, []);
-  return (
-    <div className="App">
-      <header className="App-header">
-        Reading from main site help: {JSON.stringify(helpData)}
-      </header>
-    </div>
-  );
+  return <CurrentSongView />;
 }
 
 export default App;

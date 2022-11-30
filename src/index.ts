@@ -398,7 +398,7 @@ async function getCurrentPlaylistSong(sessionKey, isNoodleMode = false) {
     tabUrl: song.url,
     tab,
     current: await getIndexOfCurrentSong(sessionKey),
-    total: totalActiveSongs,
+    total: parseInt(totalActiveSongs),
   };
 }
 
