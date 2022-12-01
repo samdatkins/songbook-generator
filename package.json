@@ -17,8 +17,6 @@
     "json5": "^2.2.1",
     "knex": "2.3.0",
     "lodash": "^4.17.x",
-    "moment": "^2.29.4",
-    "moment-range": "^4.0.2",
     "nodemon": "2.0.x",
     "pg": "^8.8.0",
     "request": "^2.88.0",
@@ -28,9 +26,9 @@
   },
   "scripts": {
     "start": "nodemon --ignore ./frontend/ src/index.ts",
-    "build": "yarn run build-backend && yarn run build-frontend ",
+    "build": "yarn run build-backend && yarn run build-frontend",
     "build-backend": "tsc",
-    "build-frontend": "cd frontend && yarn install && yarn run build",
+    "build-frontend": "cd frontend && yarn install && yarn run build && cd ..",
     "production": "yarn run build && node dist/index.js"
   },
   "resolutions": {
