@@ -5,7 +5,12 @@ import { Box, Heading, Link, Spinner, Text } from "@chakra-ui/react";
 
 function CurrentSongView() {
   const [currentSong, setCurrentSong] = useState<Song>();
-  const splitTab = currentSong && currentSong.tab.split("\n");
+  const splitTab =
+    currentSong &&
+    currentSong.tab
+      .replaceAll("[tab]", "")
+      .replaceAll("[/tab]", "")
+      .split("\n");
 
   useEffect(() => {
     async function getCurrentSong() {
@@ -34,7 +39,7 @@ function CurrentSongView() {
             p="1rem"
             style={{ columnCount: 2, columnGap: "1rem" }}
           >
-            <pre style={{ fontSize: "1.2rem" }}>
+            <pre style={{ fontSize: ".9rem" }}>
               Tab:{" "}
               {splitTab?.map((tabLine) => {
                 if (tabLine.includes("[ch]")) {
