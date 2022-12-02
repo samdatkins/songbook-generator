@@ -1,7 +1,16 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Song } from "../models/song";
-import { Box, Heading, Link, Spinner, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Link,
+  Spinner,
+  Text,
+} from "@chakra-ui/react";
+import { ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons";
 
 function CurrentSongView() {
   const [currentSong, setCurrentSong] = useState<Song>();
@@ -26,20 +35,23 @@ function CurrentSongView() {
       {!currentSong ? (
         <Spinner />
       ) : (
-        <Box padding="1rem">
-          <Heading>
-            <Link href={currentSong.tabUrl}>
-              "{currentSong.title}" by {currentSong.artist}
-            </Link>{" "}
-            ({currentSong.current} of {currentSong.total})
-          </Heading>
-          <Box
-            bgColor="gray.100"
-            mt="1rem"
-            p="1rem"
-            style={{ columnCount: 2, columnGap: "1rem" }}
-          >
-            <pre style={{ fontSize: ".9rem" }}>
+        <Flex padding="1rem" flexDir="column">
+          <Flex flexDir="row" w="100%" justifyContent="space-between">
+            <Button colorScheme="blue">
+              <ArrowBackIcon />
+            </Button>
+            <Heading as="h2" display="inline-block" fontSize="2xl">
+              <Link href={currentSong.tabUrl}>
+                "{currentSong.title}" by {currentSong.artist}
+              </Link>{" "}
+              ({currentSong.current} of {currentSong.total})
+            </Heading>
+            <Button colorScheme="blue">
+              <ArrowForwardIcon />
+            </Button>
+          </Flex>
+          <Box mt="1rem" p="1rem" style={{ columnCount: 2, columnGap: "1rem" }}>
+            <pre style={{ fontSize: "1.25rem", fontFamily: "Ubuntu Mono" }}>
               Tab:{" "}
               {splitTab?.map((tabLine) => {
                 if (tabLine.includes("[ch]")) {
@@ -54,7 +66,7 @@ function CurrentSongView() {
               })}
             </pre>
           </Box>
-        </Box>
+        </Flex>
       )}
     </>
   );
