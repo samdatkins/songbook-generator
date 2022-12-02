@@ -27,6 +27,7 @@ import {
   setSongToSpecificIndexOfActiveSongsForSession,
   updateSong,
 } from "./db/repositories/songbook";
+import apiRouter from "./routes/api";
 import { getSpotifyPlaylistTracks } from "./spotifyPlaylistReader";
 import * as ugs from "./tab-scraper";
 import { formatTab, getBestMatch, getTabForUrl } from "./tabSearcher";
@@ -59,13 +60,16 @@ app.get("/live", (req, res) =>
 
 app.get("/live/tab-autocomplete", async (req, res) => {
   const results = await new Promise((resolve, reject) => {
-    ugs.autocomplete(req.query.term.replace(alphaRegex, ""), (error, tabs) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(tabs);
+    ugs.autocomplete(
+      (req.query.term as any).replace(alphaRegex, ""),
+      (error, tabs) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(tabs);
+        }
       }
-    });
+    );
   });
   res.json(results);
 });
@@ -81,7 +85,7 @@ app.get("/live/:sessionKey/view", async (req, res) => {
   setLastNavActionToNow(req.params.sessionKey);
 
   const passengerMode =
-    (req.query.passengerMode || "").toLowerCase() === "true";
+    ((req.query.passengerMode || "") as any).toLowerCase() === "true";
 
   return res.render("viewLivePlaylist.ejs", {
     sessionKey: songbook.session_key,
@@ -308,13 +312,13 @@ app.get("/live/:sessionKey/setCurrent", async (req, res) => {
 app.get("/live/:sessionKey/setMaxSongs", async (req, res) => {
   await setMaxSongsForSession(
     req.params.sessionKey,
-    parseInt(req.query.maxSongs)
+    parseInt(req.query.maxSongs as any)
   );
   res.json(`Set max songs to ${req.query.maxSongs}`);
 });
 
 app.get("/live/:sessionKey/setNoodleMode", async (req, res) => {
-  const isNoodleMode = req.query.noodleMode.toLowerCase() === "true";
+  const isNoodleMode = (req.query.noodleMode as any).toLowerCase() === "true";
   await setNoodleModeForSession(req.params.sessionKey, isNoodleMode);
   res.json(`Set noodleMode to ${isNoodleMode}`);
 });
@@ -381,6 +385,8 @@ app.get("/help", async (req, res) => {
   /playlistGenerator<br>
   /spotifyPlaylist<br>`);
 });
+
+app.use("/api", apiRouter);
 
 const WEB_MAX_LINES_PER_SONG = 90;
 async function getCurrentPlaylistSong(sessionKey, isNoodleMode = false) {
