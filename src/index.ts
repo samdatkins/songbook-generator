@@ -217,29 +217,23 @@ app.post("/live/:sessionKey/add", async (req, res) => {
       `<p>No matches found :(</p><a href='/live/${req.params.sessionKey}/add><- Back</a>`
     );
   }
-  try {
-    const tab = (await getTabForUrl(match.url)) as any;
+  const tab = (await getTabForUrl(match.url)) as any;
 
-    const newSong = {
-      artist: tab.artist,
-      title: tab.name,
-      url: tab.url,
-      content: tab.content.text,
-    };
+  const newSong = {
+    artist: tab.artist,
+    title: tab.name,
+    url: tab.url,
+    content: tab.content.text,
+  };
 
-    addSongToSession(newSong, req.params.sessionKey);
+  addSongToSession(newSong, req.params.sessionKey);
 
-    res.render("addToLivePlaylistConfirm.ejs", {
-      artist: newSong.artist,
-      title: newSong.title,
-      sessionKey: req.params.sessionKey,
-      url: newSong.url,
-    });
-  } catch (error) {
-    return res.send(
-      `<p>No matches found :(</p><a href='/live/${req.params.sessionKey}/add><- Back</a>`
-    );
-  }
+  res.render("addToLivePlaylistConfirm.ejs", {
+    artist: newSong.artist,
+    title: newSong.title,
+    sessionKey: req.params.sessionKey,
+    url: newSong.url,
+  });
 });
 
 app.get("/live/songs/:url/edit", async (req, res) => {
