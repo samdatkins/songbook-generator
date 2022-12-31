@@ -32,8 +32,6 @@ export const addSongToSession = async (newSong, sessionKey) => {
 
   if (await isSongAlreadyInSongbook(newSong, songbook_id)) return;
 
-  console.log("adding song");
-
   let songInDb = await getSong(newSong.url);
   if (!songInDb) {
     songInDb = await addSongToDb(newSong);
@@ -221,6 +219,14 @@ export const getAllSongbooks = async () => {
 
 export const getAllSongs = async () => {
   return knex.from("song").orderBy("artist");
+};
+
+export const getAllSongbooksWithRelationships = async () => {
+  return await knex
+    .from("songbook")
+    .innerJoin("song_entry", "song_entry.songbook_id", "songbook.id")
+    .whereNull("song_entry.removed_at")
+    .innerJoin("song", "song_entry.song_id", "song.id");
 };
 
 const getNextActiveSongForSession = async (sessionKey) => {
