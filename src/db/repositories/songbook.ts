@@ -223,6 +223,21 @@ export const getAllSongs = async () => {
 
 export const getAllSongbooksWithRelationships = async () => {
   return await knex
+    .select([
+      "songbook.created_at as songbook_created_at",
+      "songbook.session_key",
+      "songbook.max_active_songs",
+      "songbook.title as songbook_title",
+      "songbook.last_nav_action_taken_at",
+      "songbook.is_noodle_mode",
+      "songbook.current_song_timestamp",
+      "song_entry.play_time",
+      "song_entry.created_at as song_entry_created_at",
+      "song.artist",
+      "song.title",
+      "song.url",
+      "song.created_at as song_created_at",
+    ])
     .from("songbook")
     .innerJoin("song_entry", "song_entry.songbook_id", "songbook.id")
     .whereNull("song_entry.removed_at")
