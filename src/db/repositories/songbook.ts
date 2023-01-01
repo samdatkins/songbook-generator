@@ -236,7 +236,6 @@ export const getAllSongbooksWithRelationships = async () => {
       "song.artist",
       "song.title",
       "song.url",
-      "song.created_at as song_created_at",
     ])
     .from("songbook")
     .innerJoin("song_entry", "song_entry.songbook_id", "songbook.id")
