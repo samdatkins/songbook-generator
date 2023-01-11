@@ -17,7 +17,7 @@
     "express-sslify": "^1.2.0",
     "http-status-codes": "^2.2.0",
     "json5": "^2.2.1",
-    "knex": "2.3.0",
+    "knex": "2.4.0",
     "lodash": "^4.17.x",
     "nodemon": "2.0.x",
     "pg": "^8.8.0",
